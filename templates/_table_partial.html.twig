@@ -1,0 +1,17 @@
+<!-- _table_partial.html.twig -->
+<table class="table table-striped table-hover text-center">
+    <tr>
+        <th>Quantité achetée</th>
+        <th>Produit</th>
+        <th>PrixUnit</th>
+        <th>Montant</th>
+    </tr>
+    {% for item in f %}
+        <tr>
+            <td>{{ item.quantite }}</td>
+            <td>{{ item.nomProduit }}</td>
+            <td>{{ item.prixUnit|number_format(0, ',', ' ') }}</td>
+            <td>{{ item.montant|number_format(0, ',', ' ') }}</td>
+        </tr>
+    {% endfor %}
+</table>

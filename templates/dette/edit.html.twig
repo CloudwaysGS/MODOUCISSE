@@ -1,0 +1,21 @@
+{# templates/dette/edit_manual.html.twig #}
+
+{% extends 'accueil.html.twig' %}
+
+{% block title %}Modifier la dette{% endblock %}
+
+{% block body %}
+    <h1>Modifier la dette</h1>
+    <div class="container col-md-4">
+        <form method="post">
+            <label for="montant_dette">Montant de la dette:</label>
+            <input class="form-control" type="text" id="montant_dette" name="montant_dette" value="{{ dette.montantDette }}" required>
+            <br>
+            <label for="commentaire">Commentaire:</label><br>
+            <textarea class="form-control" id="commentaire" name="commentaire">{{ dette.commentaire }}</textarea>
+            <br>
+            <button class="form-control" type="submit">Enregistrer</button>
+        </form>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends 'accueil.html.twig' %}
+
+{% block title %}EntreeDepot index{% endblock %}
+
+{% block body %}
+    <style>
+        .glow-on-hover {
+            width: 210px;
+            height: 30px;
+            border: none;
+            outline: none;
+            color: #fff;
+            background: #111;
+            cursor: pointer;
+            position: relative;
+            z-index: 0;
+            border-radius: 10px;
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .glow-on-hover:before {
+            content: '';
+            background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+            position: absolute;
+            top: -2px;
+            left:-2px;
+            background-size: 400%;
+            z-index: -1;
+            filter: blur(5px);
+            width: calc(100% + 4px);
+            height: calc(100% + 4px);
+            animation: glowing 20s linear infinite;
+            opacity: 0;
+            transition: opacity .3s ease-in-out;
+            border-radius: 10px;
+        }
+
+        .glow-on-hover:active {
+            color: #000
+        }
+
+        .glow-on-hover:active:after {
+            background: transparent;
+        }
+
+        .glow-on-hover:hover:before {
+            opacity: 1;
+        }
+
+        .glow-on-hover:after {
+            z-index: -1;
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #4e73df;
+            left: 0;
+            top: 0;
+            border-radius: 10px;
+        }
+
+        @keyframes glowing {
+            0% { background-position: 0 0; }
+            50% { background-position: 400% 0; }
+            100% { background-position: 0 0; }
+        }
+    </style>
+
+    {% for message in app.session.flashBag.get('success') %}
+        <div id="flash-message" class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.session.flashBag.get('danger') %}
+        <div id="flash-message" class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+
+    <h1>EntreeDepot index</h1>
+    <button class="glow-on-hover" onclick="window.location.href='{{ path('app_entree_depot_new') }}'"> Créer un nouveau </button>
+    <button class="glow-on-hover" onclick="window.location.href='{{ path('app_depot_index') }}'"> Retour au dépôt </button>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Libelle</th>
+                <th>QtEntree</th>
+                <th>Date</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entree_depot in pagination %}
+            <tr>
+                <td>{{ entree_depot.id }}</td>
+                <td>{{ entree_depot.libelle }}</td>
+                <td>{{ entree_depot.qtEntree }}</td>
+                <td>
+                    {% if entree_depot.releaseDate is not null %}
+                        {{ entree_depot.releaseDate.format('Y-m-d')}}
+                    {% else %}
+                        <!-- Handle the case where releaseDate is null -->
+                        Pas de date d entree disponible
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ path('app_entree_depot_show', {'id': entree_depot.id}) }}">show</a>
+                    <a href="{{ path('app_entree_depot_edit', {'id': entree_depot.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">Aucun enregistrement trouvé</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {{ knp_pagination_render(pagination) }}
+
+
+{% endblock %}

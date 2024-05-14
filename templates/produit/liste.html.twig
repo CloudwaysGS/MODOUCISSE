@@ -1,0 +1,91 @@
+{% extends 'accueil.html.twig' %}
+
+{% block title %}Gestion des produits{% endblock %}
+
+{% block body %}
+   
+    <div class="row">
+     <div class="container col-md-8">
+         {% for message in app.session.flashBag.get('success') %}
+             <div id="flash-message" class="alert alert-success">{{ message }}</div>
+         {% endfor %}
+
+         {% for message in app.session.flashBag.get('danger') %}
+             <div id="flash-message" class="alert alert-danger">{{ message }}</div>
+         {% endfor %}
+
+         {% if message %}
+             <div class="alert alert-warning" role="alert">
+                 {{ message }}
+             </div>
+         {% endif %}
+
+     <div class="card ">
+        <div class="card-header">
+            <a class="m-4" href="{{ path('produit_liste') }}">Liste des produits</a>
+        </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>libelle</th>
+                            <th>Stock</th>
+                            <th>prixUnit</th>
+                            <th>Montant</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        {% for produit in pagination %}
+                            <tr>
+                                <td>{{ produit.libelle }}</td>
+                                <td>{{ produit.qtStock }}</td>
+                                <td>{{ produit.prixUnit | number_format(0, ',', ' ') }}</td>
+                                <td>{{ produit.total | number_format(0, ',', ' ') }}</td>
+{#
+                                <th>{{ produit.releaseDate|date('d-m-Y') }}</th>
+#}
+                                <td class="text-center">
+                                    {% if is_granted('ROLE_GESTION_STOCK') %}
+                                    <a title="Modifier" href="{{ path('produit_edit',{'id':produit.id}) }}" class="btn btn-primary btn-circle btn-sm"><i class="fas fa-edit"></i></a>
+                                    <a title="supprimer" href="{{ path('produit_delete', {'id':produit.id}) }}" class="btn btn-danger btn-circle btn-sm"><i class="fas fa-trash" aria-hidden="true" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');"></i></a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                {{ knp_pagination_render(pagination) }}
+            </div>
+     </div>
+     </div>
+        {% if is_granted('ROLE_GESTION_STOCK') %}
+             <div class="container col-md-4">
+
+                {% for message in app.session.flashBag.get('warning') %}
+                    <div id="flash-message" class="alert alert-warning">{{ message }}</div>
+                {% endfor %}
+
+                 <div class="card">
+                     <div class="card-header">Formulaire d'ajout de produit</div>
+                     <div class="card-body">
+                         {{ form(form) }}
+                     </div>
+                 </div>
+             </div>
+        {% endif %}
+ </div>
+{% endblock %}
+{% block javascripts %}
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+    <script>
+        setTimeout(function() {
+            var flashMessage = document.getElementById('flash-message');
+            while (flashMessage !== null) {
+                flashMessage.remove();
+                flashMessage = document.getElementById('flash-message');
+            }
+        }, 5000);
+    </script>
+
+{% endblock %}

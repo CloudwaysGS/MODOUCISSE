@@ -1,0 +1,88 @@
+{% extends 'accueil.html.twig' %}
+
+{% block title %}Gestion des entrees{% endblock %}
+
+{% block body %}
+    {% for message in app.session.flashBag.get('success') %}
+        <div id="flash-message" class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.session.flashBag.get('danger') %}
+        <div id="flash-message" class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+    <div class="row">
+        <div class="container col-md-8">
+            <div class="card ">
+                <div class="card-header">Liste des achats</div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table ">
+                            <thead>
+                            <tr>
+                                <th>Produit</th>
+                                <th>Qté</th>
+                                <th>P.Unit</th>
+                                <th>Montant</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            {% for e in pagination %}
+                                <tr>
+                                    <td>{{ e.produit }}</td>
+                                    <td>{{ e.qtEntree }}</td>
+                                    <td>{{ e.prixUnit | number_format(0, ',', ' ') }}</td>
+                                    <td>{{ e.total | number_format(0, ',', ' ') }}</td>
+                                    <td>{{ e.dateEntree|date('d/m/Y') }}</td>
+                                    <td>
+{#
+                                        <a href="{{ path('entrer_modifier', {'id': e.id}) }}" ><i class="fa fa-edit"></i></a>
+#}
+                                        <a class="btn btn-danger btn-circle btn-sm" href="{{ path('entrer_delete', {'id': e.id}) }}" ><i class="fa fa-trash" aria-hidden="true" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');"></i></a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+            {{ knp_pagination_render(pagination) }}
+                </div>
+            </div>
+        </div>
+        <div class="container col-md-4">
+            <div class="card">
+                <div class="card-header">Formulaire de gestion des produits</div>
+                <div class="card-body">
+                    <form method="post" action="{{ path('entree_add') }}">
+
+                        <select class="form-control mb-3" name="produit_id" id="produit_id">
+                            <option value="" selected disabled>Choisissez un produit</option>
+                            {% for p in produits %}
+                                <option value="{{ p.id }}">{{ p.libelle }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <div>
+
+                        </div>
+                        <input class="form-control mb-3" type="text" id="qt_sortie" name="qt_sortie" placeholder="quantité" required>
+
+                        <input class="form-control mb-2" type="text" id="prix_unit" name="prix_unit" placeholder="prix unitaire" required>
+
+                        <button class="form-control btn-primary mt-1" type="submit">Enregistrer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+    <script>
+        setTimeout(function() {
+            var flashMessage = document.getElementById('flash-message');
+            if (flashMessage !== null) {
+                flashMessage.remove();
+            }
+        }, 10000);
+    </script>
+
+{% endblock %}

@@ -1,0 +1,73 @@
+
+
+{% block body %}
+    {% for message in app.session.flashBag.get('success') %}
+        <div id="flash-message" class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.session.flashBag.get('danger') %}
+        <div id="flash-message" class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+
+    <div class="row">
+        <div class="container col-md-9">
+            <div class="card ">
+                <div class="card-header">
+                    <a href="#">Détails paiement du client</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table text-center">
+                            <tr>
+                                <th>Nom du client</th>
+                                <th>Montant avance</th>
+                                <th>Date</th>
+                            </tr>
+                            {% for p in paiements %}
+                                <tr>
+                                    <th>{{ p.client }}</th>
+                                    <td>{{ p.montant | number_format(0, ',', ' ') }}</td>
+                                    <td>{{ p.datePaiement | date('d/m/Y H:i') }}</td>
+                                </tr>
+                            {% endfor %}
+                            {% if showAll %}
+                                {% for p in additionalPaiements %}
+                                    <tr class="additional-payment" style="display: none;">
+                                        <th>{{ p.client }}</th>
+                                        <td>{{ p.montant | number_format(0, ',', ' ') }}</td>
+                                        <td>{{ p.datePaiement | date('d/m/Y H:i') }}</td>
+                                    </tr>
+                                {% endfor %}
+                                <tr>
+                                {% if showAll %}
+                                    <tr>
+                                        <td colspan="3">
+                                            <a href="#" id="voir-tous-les-paiements" onclick="showAllPayments()">Voir tous les paiements</a>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+
+                                </tr>
+                            {% endif %}
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        function showAllPayments() {
+            var additionalPayments = document.querySelectorAll('.additional-payment');
+
+            for (var i = 0; i < additionalPayments.length; i++) {
+                additionalPayments[i].style.display = 'table-row';
+            }
+            var voirTousLesPaiementsButton = document.getElementById('voir-tous-les-paiements');
+            voirTousLesPaiementsButton.style.display = 'none';
+        }
+
+    </script>
+{% endblock %}

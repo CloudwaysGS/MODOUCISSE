@@ -1,0 +1,105 @@
+{% extends 'accueil.html.twig' %}
+
+{% block title %}Paiement{% endblock %}
+
+{% block body %}
+    {% for message in app.session.flashBag.get('success') %}
+        <div id="flash-message" class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.session.flashBag.get('danger') %}
+        <div id="flash-message" class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+
+    <a href="{{ path('dette_add') }}" class="btn btn-primary ml-3 m-1">liste dettes</a>
+    <div class="row">
+        <div class="container col-md-8">
+            <div class="card ">
+                <div class="card-header">Liste des clients</div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Client</th>
+                                <th>Avance</th>
+                                <th>Reste</th>
+                                <th>Date</th>
+                                <th>action</th>
+                            </tr>
+                            {% for p in pagination %}
+                                <tr>
+                                    <th>{{ p.client.nom }}</th>
+                                    <th>{{ p.montant | number_format(0, ',', ' ') }}</th>
+                                    <th>{{ p.reste | number_format(0, ',', ' ') }}</th>
+                                    <th>{{ p.datePaiement | date('d/m/Y') }}</th>
+                                    <th>
+                                        <a class="btn btn-info btn-circle btn-sm" title="detail" href="javascript:void(0);" onclick="openPopup('{{ path('paiement_detail', {'id': p.id}) }}')"><i class="fas fa-info-circle"></i></a>
+                                        <a class="btn btn-danger btn-circle btn-sm" title="supprimer" href="{{ path('paiement_delete', {'id':p.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                                    </th>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                   {{ knp_pagination_render(pagination) }}
+                </div>
+            </div>
+        </div>
+        <div class="container col-md-4">
+            <div class="card">
+                <div class="card-header">Formulaire de gestion des clients</div>
+                <div class="card-body">
+                    {{ form(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade custom-modal" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" >Détails</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- ... dette/detail.html.twig ... -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block javascripts %}
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+    <script>
+        setTimeout(function() {
+            var flashMessage = document.getElementById('flash-message');
+            if (flashMessage !== null) {
+                flashMessage.remove();
+            }
+        }, 10000);
+    </script>
+
+    <script>
+        function openPopup(url) {
+            // Effectuer une requête AJAX pour récupérer le contenu du formulaire
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    // Injecter le contenu dans le modal Bootstrap
+                    const modalBody = document.getElementById('myModal').querySelector('.modal-body');
+                    modalBody.innerHTML = data;
+
+                    // Afficher le modal
+                    $('#myModal').modal('show');
+
+                    // Initialize your form (if needed, e.g., for date pickers)
+                    // Example: $(document).find('form').initPlugin();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+    </script>
+
+{% endblock %}

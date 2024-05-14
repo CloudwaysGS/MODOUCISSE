@@ -1,0 +1,70 @@
+
+
+{% block body %}
+    {% for message in app.session.flashBag.get('success') %}
+        <div id="flash-message" class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.session.flashBag.get('danger') %}
+        <div id="flash-message" class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+
+    <div class="row">
+        <div class="container col-md-9">
+            <div class="card ">
+                <div class="card-header">
+                    <a href="#">Détails du client</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tr>
+                                <th>Nom du client</th>
+                                <td>{{ infos.client.nom }}</td>
+                            </tr>
+                            <tr>
+                                <th>Montant dette</th>
+                                <td>{{ infos.montantDette | number_format(0, ',', ' ') }} F</td>
+                            </tr>
+                            <tr>
+                                <th>Reste</th>
+                                <td>{{ infos.reste | number_format(0, ',', ' ') }} F</td>
+                            </tr>
+                            <tr>
+                                <th>Statut</th>
+                                <td>
+                                    <a class="btn btn-primary btn-sm" style="background-color: {% if infos.statut == 'payée' %}primary{% else %}#e74a3b{% endif %}; color: white; border: none; height: 20px;line-height: 10px; ; text-align: center;">
+                                        {{ infos.statut }}
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Descriptions</th>
+                                <td>{{ infos.commentaire }}</td>
+                            </tr>
+                            <tr>
+                                <th>Date</th>
+                                <td>{{ infos.dateCreated| date('d/m/Y H:i') }}</td>
+                            </tr>
+                            <!-- Ajoutez d'autres lignes de la table pour afficher les autres détails de la dette -->
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+{% endblock %}
+{% block javascripts %}
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+    <script>
+        setTimeout(function() {
+            var flashMessage = document.getElementById('flash-message');
+            if (flashMessage !== null) {
+                flashMessage.remove();
+            }
+        }, 10000);
+    </script>
+
+{% endblock %}

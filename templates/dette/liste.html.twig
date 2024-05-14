@@ -1,0 +1,267 @@
+{% extends 'accueil.html.twig' %}
+
+{% block title %}Dette{% endblock %}
+
+{% block body %}
+
+    <style>
+
+        .glow-on-hover {
+            width: 130px;
+            height: 35px;
+            border: none;
+            outline: none;
+            color: #fff;
+            background: #111;
+            cursor: pointer;
+            position: relative;
+            z-index: 0;
+            border-radius: 10px;
+        }
+
+        .glow-on-hover:before {
+            content: '';
+            background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+            position: absolute;
+            top: -2px;
+            left:-2px;
+            background-size: 400%;
+            z-index: -1;
+            filter: blur(5px);
+            width: calc(100% + 4px);
+            height: calc(100% + 4px);
+            animation: glowing 20s linear infinite;
+            opacity: 0;
+            transition: opacity .3s ease-in-out;
+            border-radius: 10px;
+        }
+
+        .glow-on-hover:active {
+            color: #000
+        }
+
+        .glow-on-hover:active:after {
+            background: transparent;
+        }
+
+        .glow-on-hover:hover:before {
+            opacity: 1;
+        }
+
+        .glow-on-hover:after {
+            z-index: -1;
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #4e73df;
+            left: 0;
+            top: 0;
+            border-radius: 10px;
+        }
+
+        @keyframes glowing {
+            0% { background-position: 0 0; }
+            50% { background-position: 400% 0; }
+            100% { background-position: 0 0; }
+        }
+    </style>
+
+    {% for message in app.session.flashBag.get('success') %}
+        <div id="flash-message" class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.session.flashBag.get('danger') %}
+        <div id="flash-message" class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+
+    <button class="glow-on-hover ml-3 m-1">
+        <a onclick="window.location.href='{{ path('paiement_add') }}'">Paiement</a>
+    </button>
+    <button class="glow-on-hover">
+        <a onclick="window.location.href='{{ path('liste_chargement') }}'">Mes Facts</a>
+    </button>
+    <button class="glow-on-hover">
+        <a onclick="window.location.href='{{ path('client_add') }}'">+client</a>
+    </button>
+    <button class="glow-on-hover">
+        <a > {{ sommeMontantImpaye | number_format(0, ',', ' ') }} </a>
+    </button>
+    <div class="row">
+        <div class="container col-md-9">
+            <div class="card ">
+                <div class="card-header">
+                    <a href="#">Liste des dettes clients</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nom client</th>
+                                <th>Montant</th>
+                                <th>Reste</th>
+                                <th>statut</th>
+                                <th>Date</th>
+                                <th>action</th>
+                            </tr>
+                        </thead
+                            {% for d in pagination %}
+                                <tr>
+                                    <td>{{ d.client }}</td>
+                                    <td>{{ d.montantDette | number_format(0, ',', ' ') }}</td>
+                                    {% if is_numeric(d.reste) %}
+                                        <td style="color: {{ d.reste < 0 ? 'red' : 'inherit' }}">
+                                            {{ d.reste < 0 ? -d.reste : d.reste | number_format(0, ',', ' ') }}
+                                        </td>
+                                    {% else %}
+                                        <td>{{ d.reste }}</td>
+                                    {% endif %}
+                                    <td>
+                                        <a class="btn btn-primary btn-sm" style="background-color: {% if d.statut == 'payée' %}primary{% else %}#e74a3b{% endif %}; color: white; border: none; width: 100%; line-height: 10px; text-align: center;">
+                                            {{ d.statut }}
+                                        </a>
+                                    </td>
+
+                                    <td>{{ d.dateCreated | date('d/m/Y') }}</td>
+                                    <td>
+{#
+                                        <a class="btn btn-primary btn-circle btn-sm" title="paiement" href="{{ path('paiement_add') }}" ><i class="fas fa-money-bill-alt"></i></a>
+#}
+                                        <a class="btn btn-info btn-circle btn-sm" title="info" href="javascript:void(0);" onclick="openPopup('{{ path('dette_info', {'id': d.id}) }}')" ><i class="fas fa-info-circle"></i></a>
+                                        <a class="btn btn-warning btn-circle btn-sm" title="modifier" href="{{ path('edit_dette', {'id':d.id}) }}" "><i class="fa fa-edit" aria-hidden="true"></i> </a>
+                                        <a class="btn btn-danger btn-circle btn-sm" title="supprimer" href="{{ path('dette_delete', {'id':d.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette dette ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
+
+
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    {{ knp_pagination_render(pagination) }}
+                </div>
+            </div>
+        </div>
+        <div class="container col-md-3">
+            <div class="card">
+                <div class="card-header">Formulaire de gestion des dettes</div>
+                <div class="card-body">
+                    {{ form(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade custom-modal" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" >Détails</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- ... dette/detail.html.twig ... -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block javascripts %}
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.open-modal').click(function() {
+                $('#exampleModal').modal('show');
+            });
+        });
+    </script>
+    <script>
+        setTimeout(function() {
+            var flashMessage = document.getElementById('flash-message');
+            if (flashMessage !== null) {
+                flashMessage.remove();
+            }
+        }, 10000);
+    </script>
+
+    <script>
+        function openPopup(url) {
+            // Effectuer une requête AJAX pour récupérer le contenu du formulaire
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    // Injecter le contenu dans le modal Bootstrap
+                    const modalBody = document.getElementById('myModal').querySelector('.modal-body');
+                    modalBody.innerHTML = data;
+
+                    // Afficher le modal
+                    $('#myModal').modal('show');
+
+                    // Initialize your form (if needed, e.g., for date pickers)
+                    // Example: $(document).find('form').initPlugin();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInput = document.getElementById('search_nom');
+            const tableBody = document.querySelector('.table-bordered tbody');
+            const paginationContainer = document.getElementById('pagination');
+
+            const tableHeader = `
+        <tr>
+            <th>Nom client</th>
+            <th>Montant</th>
+            <th>Reste</th>
+            <th>Statut</th>
+            <th>Date</th>
+            <th>Action</th>
+        </tr>
+    `;
+
+            let currentPage = 1;
+
+            searchInput.addEventListener('input', function(event) {
+                const searchValue = event.target.value.trim();
+
+                fetch(`/recherche?search=${encodeURIComponent(searchValue)}&page=${currentPage}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        tableBody.innerHTML = '';
+                        if (data.results.length > 0) {
+                            tableBody.innerHTML = tableHeader;
+                            data.results.forEach(result => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                            <td>${result.client}</td>
+                            <td>${result.montantDette}</td>
+                            <td style="color: ${ result.reste < 0 ? 'red' : 'inherit' }" >${result.reste}</td>
+                            <td><a class="btn btn-sm ${result.statut === 'payée' ? 'btn-primary' : 'btn-danger'}" href="#" style="color: white;">${result.statut}</a></td>
+                            <td>${result.dateCreated}</td>
+                            <td>
+                                <a class="btn btn-info btn-circle btn-sm" title="info" href="javascript:void(0);" onclick="openPopup('${result.infoUrl}')"><i class="fas fa-info-circle"></i></a>
+                                <a class="btn btn-warning btn-circle btn-sm" title="modifier" href="${result.editUrl}"><i class="fa fa-edit" aria-hidden="true"></i></a>
+                                <a class="btn btn-danger btn-circle btn-sm" title="supprimer" href="${result.deleteUrl}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette dette ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                            </td>
+                        `;
+                                tableBody.appendChild(row);
+                            });
+                        } else {
+                            paginationContainer.innerHTML = `Aucun résultat trouvé.`;
+                        }
+                    })
+                    .catch(error => console.error('Erreur lors de la recherche :', error));
+            });
+        });
+
+    </script>
+
+
+
+{% endblock %}

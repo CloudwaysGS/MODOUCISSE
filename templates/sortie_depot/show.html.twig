@@ -1,0 +1,30 @@
+{% extends 'accueil.html.twig' %}
+
+{% block title %}SortieDepot{% endblock %}
+
+{% block body %}
+    <h1>SortieDepot</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ sortie_depot.id }}</td>
+            </tr>
+            <tr>
+                <th>QtSortie</th>
+                <td>{{ sortie_depot.qtSortie }}</td>
+            </tr>
+            <tr>
+                <th>Libelle</th>
+                <td>{{ sortie_depot.libelle }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_sortie_depot_index') }}">back to list</a>
+
+    <a href="{{ path('app_sortie_depot_edit', {'id': sortie_depot.id}) }}">edit</a>
+
+    {{ include('sortie_depot/_delete_form.html.twig') }}
+{% endblock %}

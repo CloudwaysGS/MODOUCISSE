@@ -1,0 +1,35 @@
+{% extends 'accueil.html.twig' %}
+
+{% block title %}Facture{% endblock %}
+
+{% block body %}
+    <div class="container col-md-6">
+        <div class="card ">
+            <div class="card-header">Mes produits</div>
+            <div class="card-body">
+                <form method="post" action="{{ path('sortie_modifier', {'id': sortie.id}) }}">
+                    <select class="form-control mb-2" name="client_id" id="client_id">
+                            <option value="{{ sortie.id }}">{{ sortie.client }}</option>
+                    </select>
+                    {% if sortie.action == "detail" %}
+                        <select class="form-control mb-2" name="detail_id" id="detail_id">
+                            <option value="{{ sortie.id }}">{{ sortie.nomProduit }}</option>
+                        </select>
+                    {% else %}
+                        <select class="form-control mb-2" name="produit_id" id="produit_id">
+                            <option value="{{ sortie.id }}">{{ sortie.nomProduit }}</option>
+                        </select>
+                    {% endif %}
+                    <input class="form-control mb-2" type="text" id="qt_sortie" name="qt_sortie" value="{{ sortie.qtSortie }}" required>
+                    <input class="form-control mb-2" type="text" id="prix_unit" name="prix_unit" value="{{ sortie.prixUnit }}" required>
+
+
+                    <button class="form-control" type="submit">Enregistrer les modifications</button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+

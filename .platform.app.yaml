@@ -1,0 +1,12 @@
+# .platform.app.yaml
+
+name: app
+type: php:8.1
+build:
+    flavor: composer
+hooks:
+    build: |
+        set -e
+        composer install --no-dev
+relationships:
+    database: "database:mysql"

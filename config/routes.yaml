@@ -1,0 +1,10 @@
+controllers:
+    resource: ../src/Controller/
+    type: attribute
+
+app_error_404:
+    path: /{wildcard}
+    controller: App\Controller\ErrorController::error404
+    requirements:
+        wildcard: ".*"
+

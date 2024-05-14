@@ -1,0 +1,30 @@
+{% extends 'accueil.html.twig' %}
+
+{% block title %}EntreeDepot{% endblock %}
+
+{% block body %}
+    <h1>EntreeDepot</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ entree_depot.id }}</td>
+            </tr>
+            <tr>
+                <th>QtEntree</th>
+                <td>{{ entree_depot.qtEntree }}</td>
+            </tr>
+            <tr>
+                <th>Libelle</th>
+                <td>{{ entree_depot.libelle }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_entree_depot_index') }}">Retour à la liste</a>
+
+    <a href="{{ path('app_entree_depot_edit', {'id': entree_depot.id}) }}">Modifier</a>
+
+    {{ include('entree_depot/_delete_form.html.twig') }}
+{% endblock %}

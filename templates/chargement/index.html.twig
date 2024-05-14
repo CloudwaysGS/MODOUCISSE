@@ -1,0 +1,166 @@
+{% extends 'accueil.html.twig' %}
+
+{% block title %}Chargement{% endblock %}
+
+{% block body %}
+    {% for message in app.session.flashBag.get('success') %}
+        <div id="flash-message" class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.session.flashBag.get('danger') %}
+        <div id="flash-message" class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+    <div class="container col-md-12">
+
+        <div class="card ">
+            <div class="card-header">Liste des commandes</div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered text-center">
+                        <tr>
+                            <th>N.Facture</th>
+                            <th>Nbre</th>
+                            <th>Client</th>
+                            <th>Adresse</th>
+                            <th>Téléphone</th>
+                            <th>Total</th>
+                            <th>Date</th>
+                            <th>Statut</th>
+                            <th>Action</th>
+                        </tr>
+                        {% for c in chargement %}
+                            <tr>
+                                <th>{{ c.numeroFacture }}</th>
+                                <th>{{ c.nombre }}</th>
+                                <th>{{ c.nomClient }}</th>
+                                <th>{{ c.adresse }}</th>
+                                <th>{{ c.telephone }}</th>
+                                <th>{{ c.total }}</th>
+                                <th>{{ c.date | date('d/m/Y') }}</th>
+                                <th style="color: {% if c.statut == 'payée' %} green {% elseif c.statut == 'impayé' %} red {% elseif c.statut == 'En cours' %} orange {% endif %}">
+                                    {{ c.statut }}
+                                </th>
+
+                                <th>
+                                    <a class="popup-link" title="payée" href="{{ path('statut', {'id':c.id}) }}" ><i class="fa fa-money-bill-alt"></i></a>
+                                    <a class="popup-link" title="facture détaillée" href="javascript:void(0);" onclick="openPopup('{{ path('extraire', {'id': c.id}) }}')"><i class="fa fa-download"></i></a>
+                                    <a title="extraire en pdf" href="{{ path('pdf', {'id':c.id}) }}"><i class="fa fa-file-pdf"></i></a>
+                                    <a title="user" href="#" data-toggle="modal" data-target="#userModal" data-user-id="{{ c.id }}">
+                                        <i class="fa fa-user" aria-hidden="true"></i>
+                                    </a>
+
+                                    {% if is_granted('ROLE_GESTION_STOCK') %}
+                                    <a title="supprimer" href="{{ path('chargement_delete', {'id':c.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette facture ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                    {% endif %}
+                                </th>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-center">
+                        {% if total > limit %}
+                            {% set pages = (total / limit)|round(0, 'ceil') %}
+                            {% for i in 1..pages %}
+                                {% if i == page %}
+                                    <li class="page-item active" aria-current="page">
+                                        <span class="page-link">{{ i }} <span class="sr-only">(current)</span></span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item"><a class="page-link" href="{{ path('liste_chargement', {'page': i}) }}">{{ i }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- ... Extraire ... -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
+                    <!-- ... extraire.html.twig ... -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ... USER ... -->
+    <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content" >
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalLabel">User</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="user-modal-body text-center"> <!-- Center the content -->
+                    <!-- Contenu de l'utilisateur sera affiché ici -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+{% block javascripts %}
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+    <script>
+        setTimeout(function() {
+            var flashMessage = document.getElementById('flash-message');
+            if (flashMessage !== null) {
+                flashMessage.remove();
+            }
+        }, 5000);
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            $('a[data-toggle="modal"][data-target="#userModal"]').click(function(e) {  // Ajoutez le sélecteur du modal au lien
+                e.preventDefault();
+
+                var userId = $(this).data('user-id');
+
+                axios.get('/chargement/user/' + userId)
+                    .then(function(response) {
+                        var user = response.data.user;
+
+                        // Afficher les données dans la fenêtre modale
+                        $('#userModal .user-modal-body').text(user);
+                        $('#userModal').modal('show');
+                    })
+                    .catch(function(error) {
+                        console.error(error);
+                    });
+            });
+        });
+
+    </script>
+
+    <script>
+        function openPopup(url) {
+            // Effectuer une requête AJAX pour récupérer le contenu de la table
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Injecter le contenu dans le modal Bootstrap
+                    const modalBody = document.getElementById('myModal').querySelector('.modal-body');
+                    modalBody.innerHTML = data.table;
+
+                    // Afficher le modal
+                    $('#myModal').modal('show');
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+    </script>
+
+{% endblock %}
