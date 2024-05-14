@@ -78,6 +78,8 @@ class ClientController extends AbstractController
             return $this->redirectToRoute("client_liste");
         }
 
+        $this->addFlash('warning', 'MODIFICATION');
+
         return $this->render('client/index.html.twig',[
             'pagination' => $pagination,
             'form' => $form->createView()

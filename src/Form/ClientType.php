@@ -42,15 +42,6 @@ class ClientType extends AbstractType
                     new Type('numeric')
                 )
             ))
-            ->add('ville',TextType::class, array(
-                'label' => false,
-                'attr' => array(
-                    'class' => 'form-control form-group',
-                    'placeholder' => 'Ville',
-
-                    ),
-                'required' => false,
-            ))
 
             ->add('Valider', SubmitType::class, array(
                 'attr' =>array('class' => 'btn btn-primary form-group')

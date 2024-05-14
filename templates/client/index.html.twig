@@ -9,8 +9,7 @@
     {% for message in app.session.flashBag.get('danger') %}
         <div id="flash-message" class="alert alert-danger">{{ message }}</div>
     {% endfor %}
-    <a href="{{ path('facture_liste') }}" class="btn btn-primary ml-3 mb-2">facture</a>
-    <a href="{{ path('dette_liste') }}" class="btn btn-primary ml-3 mb-2">dette</a>
+    
     <div class="row">
         <div class="container col-md-8">
 
@@ -20,10 +19,9 @@
                         <table class="table">
                         <thead>
                             <tr>
-                                <th>client</th>
+                                <th>Client</th>
                                 <th>Adresse</th>
                                 <th>Telephone</th>
-                                <th>Ville</th>
                                 <th>action</th>
                             </tr>
                         </thead
@@ -32,7 +30,6 @@
                                     <td>{{ c.nom }}</td>
                                     <td>{{ c.adresse }}</td>
                                     <td>{{ c.telephone }}</td>
-                                    <td>{{ c.ville }}</td>
                                     <td>
                                         <a class="btn btn-primary btn-circle btn-sm" title="Modifier" href="{{ path('edit_client',{'id':c.id}) }}"><i class="fa fa-edit"></i></a>
                                         {% if is_granted('ROLE_GESTION_STOCK') %}
@@ -48,6 +45,10 @@
             </div>
         </div>
         <div class="container col-md-4">
+            {% for message in app.session.flashBag.get('warning') %}
+                <div id="flash-message" class="alert alert-warning">{{ message }}</div>
+            {% endfor %}
+
             <div class="card">
                 <div class="card-header">Formulaire de gestion des clients</div>
                 <div class="card-body">

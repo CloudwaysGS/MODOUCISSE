@@ -42,7 +42,7 @@ class ClientRepository extends ServiceEntityRepository
     public function findAllOrderedByDate()
     {
         return $this->createQueryBuilder('p')
-            ->orderBy('p.nom', 'ASC') // Changement de DESC à ASC
+            ->orderBy('p.dateCreated', 'DESC') // Changement de DESC à ASC
             ->getQuery()
             ->getResult();
     }

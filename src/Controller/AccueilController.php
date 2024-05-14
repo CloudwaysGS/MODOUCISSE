@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\TotalMensuel;
 use App\Repository\ChargementRepository;
 use App\Repository\EntreeRepository;
 use App\Repository\ProduitRepository;
