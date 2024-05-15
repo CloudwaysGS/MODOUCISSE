@@ -104,49 +104,16 @@
             <div class="card">
                 <div class="select-container">
 
-                    <div class="card">
-                        <div class="card-body">
-
-                            <form name="searchDetail" method="post" class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
-                                <div class="input-group">
-                                    <input type="text" id="search-client" name="search[nomClient]" class="form-control bg-light border-0 small" placeholder="Rechercher un client..."
-                                           aria-label="Search" aria-describedby="basic-addon2">
-                                    <div class="input-group-append">
-                                        <button class="btn btn-primary" type="button" >
-                                            <i class="fas fa-search fa-sm"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                            <div class="table-responsive" onmouseover="changeHeight('10rem')" onmouseout="changeHeight('3rem')" style="height: 3rem;">
-                                <table class="table table-striped table-hover table-client">
-                                    {% for client in clients %}
-                                        <tr>
-                                            <th class="small-text">{{ client.nom }}</th>
-                                            <td>
-                                                <button class="btn btn-primary btn-circle btn-sm" title="Sélectionner" onclick="selectClient('{{ client.id }}')">
-                                                    <i class="fa fa-cart-plus" aria-hidden="true"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-
-                                </table>
-                            </div>
-                        </div>
-
-                    </div>
-
                     <input type="hidden" name="clientId" id="selectedClientId" value="">
                     <input type="hidden" name="productId" id="selectedProductId" value="">
                     <input type="hidden" name="quantity" id="selectedQuantity" value="">
 
 
-                    <div class="card mt-1">
+                    <div class="card">
                         <div class="card-header">Vente en gros de produits</div>
                         <div class="card-body">
 
-                            <div class="table-responsive"  style="height: 20rem;">
+                            <div class="table-responsive" onmouseover="changeHeight('20rem')" onmouseout="changeHeight('10rem')" style="height: 10rem;">
                                 <table class="table table-striped table-hover table-produit">
 
                                     {% set total = 0 %}
@@ -167,6 +134,40 @@
                                     {% endfor %}
                                 </table>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-1">
+                        <div class="card-body">
+
+                            <form name="searchDetail" method="post" class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+                                <div class="input-group">
+                                    <input type="text" id="search-client" name="search[nomClient]" class="form-control bg-light border-0 small" placeholder="Rechercher un client..."
+                                           aria-label="Search" aria-describedby="basic-addon2">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" type="button" >
+                                            <i class="fas fa-search fa-sm"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <div class="table-responsive"  style="height: 5rem;">
+                                <table class="table table-striped table-hover table-client">
+                                    {% for client in clients %}
+                                        <tr>
+                                            <th class="small-text">{{ client.nom }}</th>
+                                            <td>
+                                                <button class="btn btn-primary btn-circle btn-sm" title="Sélectionner" onclick="selectClient('{{ client.id }}')">
+                                                    <i class="fa fa-cart-plus" aria-hidden="true"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+
+                                </table>
+                            </div>
+
                         </div>
 
                     </div>
