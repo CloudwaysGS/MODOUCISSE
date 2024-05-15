@@ -267,4 +267,22 @@ class FactureController extends AbstractController
         return $this->json($data);
     }
 
+    #[Route('/search-clients', name: 'search_clients')]
+    public function searchClients(Request $request, ClientRepository $clientRepository): JsonResponse
+    {
+        $searchTerm = $request->query->get('term');
+        $clients = $clientRepository->findByNameClient($searchTerm);
+
+        $data = [];
+        foreach ($clients as $client) {
+            $data[] = [
+                'id' => $client->getId(),
+                'nom' => $client->getNom(),
+            ];
+        }
+
+        return $this->json($data);
+    }
+
+
 }

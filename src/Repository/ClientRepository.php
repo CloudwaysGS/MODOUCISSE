@@ -47,6 +47,16 @@ class ClientRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findByNameClient($nom)
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.nom LIKE :nom')
+            ->setParameter('nom', '%'.$nom.'%')
+            ->orderBy('c.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
 
 //    /**
 //     * @return Client[] Returns an array of Client objects

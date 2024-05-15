@@ -28,28 +28,36 @@ class AccueilController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult();
 
-
         $entreetotal24H = 0;
         $entreetotal = 0;
 
-        //Somme des produit achetés aujourd'hui dans facture
+        // Date et heure actuelle
+        $currentDateTime = new \DateTime();
+        // Réinitialisation à minuit
+        $currentDateTime->setTime(0, 0, 0);
+
+        // Date et heure il y a 24 heures
+        $twentyFourHoursAgo = clone $currentDateTime;
+        $twentyFourHoursAgo->modify('-24 hours');
+
+        // Total des sorties effectuées depuis les dernières 24 heures jusqu'à maintenant
+        $sortie24H = $sort->createQueryBuilder('s')
+            ->select('COALESCE(SUM(s.total), 0)')
+            ->where('s.dateSortie >= :today')
+            ->setParameter('today', $currentDateTime)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        // Total des produits achetés depuis minuit aujourd'hui (réinitialisation)
         $sumTotal24H = $charge->createQueryBuilder('c')
             ->select('COALESCE(SUM(c.total), 0)')
             ->where('c.date >= :today')
-            ->setParameter('today', new \DateTime('-1 day')) // Utilisation directe de la date dans la requête
+            ->setParameter('today', $currentDateTime)
             ->getQuery()
             ->getSingleScalarResult();
 
-        //Calcul du total des sorties effectuées dans les dernières 24 heures
-        $twentyFourHoursAgo = new \DateTime('-24 hours');
-
-        $sortietotal24H = $sort->createQueryBuilder('s')
-            ->select('COALESCE(SUM(s.total), 0)')
-            ->where('s.dateSortie >= :twentyFourHoursAgo')
-            ->setParameter('twentyFourHoursAgo', $twentyFourHoursAgo)
-            ->getQuery()
-            ->getSingleScalarResult();
-        $sortietotal24H += $sumTotal24H;
+        // Somme totale des sorties des 24 dernières heures et des produits achetés depuis minuit aujourd'hui
+        $sortietotal24H = $sortie24H + $sumTotal24H;
 
 
         // obtenir la date de début et de fin du mois en cours

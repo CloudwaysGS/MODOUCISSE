@@ -31,9 +31,6 @@
         .card {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Example box shadow */
         }
-        select {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); /* Example box shadow */
-        }
 
         .custom-input {
             width: 70px;
@@ -107,13 +104,37 @@
             <div class="card">
                 <div class="select-container">
 
-                    <div class="select_client">
-                        <select class="form-control mb-1" name="client" id="client">
-                            <option value="" selected disabled>Choisissez un client</option>
-                            {% for clients in clients %}
-                                <option value="{{ clients.id }}">{{ clients.nom }}</option>
-                            {% endfor %}
-                        </select>
+                    <div class="card">
+                        <div class="card-body">
+
+                            <form name="searchDetail" method="post" class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+                                <div class="input-group">
+                                    <input type="text" id="search-client" name="search[nomClient]" class="form-control bg-light border-0 small" placeholder="Rechercher un client..."
+                                           aria-label="Search" aria-describedby="basic-addon2">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" type="button" >
+                                            <i class="fas fa-search fa-sm"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="table-responsive" onmouseover="changeHeight('10rem')" onmouseout="changeHeight('3rem')" style="height: 3rem;">
+                                <table class="table table-striped table-hover table-client">
+                                    {% for client in clients %}
+                                        <tr>
+                                            <th class="small-text">{{ client.nom }}</th>
+                                            <td>
+                                                <button class="btn btn-primary btn-circle btn-sm" title="Sélectionner" onclick="selectClient('{{ client.id }}')">
+                                                    <i class="fa fa-cart-plus" aria-hidden="true"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+
+                                </table>
+                            </div>
+                        </div>
+
                     </div>
 
                     <input type="hidden" name="clientId" id="selectedClientId" value="">
@@ -121,16 +142,13 @@
                     <input type="hidden" name="quantity" id="selectedQuantity" value="">
 
 
-                    <div class="card">
+                    <div class="card mt-1">
                         <div class="card-header">Vente en gros de produits</div>
                         <div class="card-body">
-                            <div class="table-responsive" onmouseover="changeHeight('20rem')" onmouseout="changeHeight('20rem')" style="height: 20rem;">
-                                <table class="table table-striped table-hover">
-                                    <tr>
-                                        <th>Libelle</th>
-                                        <th>Qté</th>
-                                        <th>Action</th>
-                                    </tr>
+
+                            <div class="table-responsive"  style="height: 20rem;">
+                                <table class="table table-striped table-hover table-produit">
+
                                     {% set total = 0 %}
                                     {% for p in produits %}
                                         <tr>
@@ -256,9 +274,10 @@
         }, 3000);
     </script>
 
+
     <script>
         function addToFacture(path, productId) {
-            var clientId = document.getElementById('client').value;
+            var clientId = document.getElementById('selectedClientId').value;
             var quantity = document.getElementById('quantity_' + productId).value;
             // Set the values in the hidden fields
             document.getElementById('selectedClientId').value = clientId;
@@ -272,7 +291,7 @@
     </script>
 
     <script>
-        // search.js
+        // Script pour la recherche de produits
         document.addEventListener('DOMContentLoaded', function () {
             const searchForm = document.getElementById('search-form');
             const searchInput = document.getElementById('search_nom');
@@ -310,39 +329,107 @@
 
         function updateResultsTable(data) {
             console.log(data)
-            const tableBody = document.querySelector('.table tbody');
+            const tableBodyProduit = document.querySelector('.table-produit tbody'); // Cible le tableau des produits
             if (data.length === 0) {
-                // Display "Produit non trouvé" if no results
-                tableBody.innerHTML = '<tr><th colspan="3">Produit introuvable</th></tr>';
+                // Affiche "Produit introuvable" si aucun résultat
+                tableBodyProduit.innerHTML = '<tr><th colspan="3">Produit introuvable</th></tr>';
             } else {
-                tableBody.innerHTML = ''; // Clear existing rows
+                tableBodyProduit.innerHTML = ''; // Efface les lignes existantes
 
                 data.forEach(item => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                <th>${item.libelle}</th>
-                <td>
-                    <input type="number" class="form-control custom-input custom-input-small" name="quantity" id="quantity_${item.id}" value="1" min="1">
-                </td>
-                <td>
-                    <a class="btn btn-primary btn-circle btn-sm" title="Ajouter" href="javascript:void(0);" onclick="addToFacture('${item.path}', ${item.id})">
-                        <i class="fa fa-cart-plus" aria-hidden="true"></i>
-                    </a>
-                </td>
-            `;
-                    tableBody.appendChild(row);
+                    <th>${item.libelle}</th>
+                    <td>
+                        <input type="number" class="form-control custom-input custom-input-small" name="quantity" id="quantity_${item.id}" value="1" min="1">
+                    </td>
+                    <td>
+                        <a class="btn btn-primary btn-circle btn-sm" title="Ajouter" href="javascript:void(0);" onclick="addToFacture('${item.path}', ${item.id})">
+                            <i class="fa fa-cart-plus" aria-hidden="true"></i>
+                        </a>
+                    </td>
+                `;
+                    tableBodyProduit.appendChild(row);
                 });
             }
         }
-
-
     </script>
+
+    <script>
+        // Script pour la recherche de clients
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchClientInput = document.getElementById('search-client');
+
+            searchClientInput.addEventListener('input', function () {
+                const searchTerm = searchClientInput.value.trim();
+                if (searchTerm === '') {
+                    // Réinitialise l'affichage des clients si le champ de recherche est vide
+                    resetClientTable();
+                } else {
+                    performClientSearch(searchTerm);
+                }
+            });
+        });
+
+        function resetClientTable() {
+            // Réinitialise l'affichage des clients ici (à implémenter selon vos besoins)
+            const tableBodyClient = document.querySelector('.table-client tbody'); // Cible le tableau des clients
+            tableBodyClient.innerHTML = '';
+        }
+
+        function performClientSearch(searchTerm) {
+            // Envoie une requête AJAX pour rechercher des clients correspondant au terme de recherche
+            fetch(`/search-clients?term=${searchTerm}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    updateClientResultsTable(data);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function updateClientResultsTable(data) {
+            const tableBodyClient = document.querySelector('.table-client tbody'); // Cible le tableau des clients
+            tableBodyClient.innerHTML = ''; // Efface les résultats précédents
+
+            if (data.length === 0) {
+                // Affiche "Aucun client trouvé" si aucun résultat
+                tableBodyClient.innerHTML = '<tr><td colspan="2">Aucun client trouvé</td></tr>';
+            } else {
+                // Affiche les clients trouvés
+                data.forEach(client => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                    <td>${client.nom}</td>
+                    <td>
+                        <button class="btn btn-primary btn-circle btn-sm" title="Sélectionner" onclick="selectClient(${client.id})">
+                            <i class="fa fa-cart-plus" aria-hidden="true"></i>
+                        </button>
+                    </td>
+                `;
+                    tableBodyClient.appendChild(row);
+                });
+            }
+        }
+    </script>
+
 
     <script>
         function changeHeight(height) {
             document.querySelector('.table-responsive').style.height = height;
         }
     </script>
+
+    <script>
+        function selectClient(clientId) {
+            document.getElementById('selectedClientId').value = clientId;
+        }
+    </script>
+
 
     <script>
         function changeHeightDetails(height) {
