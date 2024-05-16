@@ -60,7 +60,6 @@ class FactureController extends AbstractController
         if (!$facture) {
             throw $this->createNotFoundException('Facture non trouvée');
         }
-
         if ($request->isMethod('POST')) {
             // Récupérer les données modifiées depuis la requête
             $quantiteInitiale = $facture->getQuantite(); // Ancienne quantité
@@ -71,13 +70,11 @@ class FactureController extends AbstractController
             $prixUnit = $request->request->get('prixUnit');
             $produitId = $request->request->get('produit');
             $produit = $entityManager->getRepository(Produit::class)->find($produitId);
-
             // Mettre à jour la facture avec les nouvelles données
             $facture->setQuantite($quantiteNouvelle);
             $facture->setNomProduit($produit);
             $facture->setPrixUnit($prixUnit);
             $facture->setMontant($quantiteNouvelle * $prixUnit);
-
 
             // Mettre à jour la quantité en stock du produit
             $quantiteStockActuelle = $produit->getQtStock();
@@ -89,7 +86,8 @@ class FactureController extends AbstractController
                 // Nouvelle quantité est inférieure à l'ancienne
                 $nouvelleQuantiteStock = $quantiteStockActuelle + abs($differenceQuantite);
             } elseif ($differenceQuantite == 0) {
-
+                $total = $this->factureService->updateTotalForFactures();
+                $facture->setTotal($total);
                 // Nouvelle quantité est égale à l'ancienne
                 $entityManager->flush();
                 return $this->redirectToRoute('facture_liste');
@@ -109,7 +107,6 @@ class FactureController extends AbstractController
 
         // Récupérer la liste des produits pour afficher dans le formulaire
         $produits = $entityManager->getRepository(Produit::class)->findAll();
-
         return $this->render('facture/editer.html.twig', [
             'facture' => $facture,
             'produits' => $produits,
@@ -180,6 +177,7 @@ class FactureController extends AbstractController
                 $chargement->addFacture($facture);
                 $entityManager->persist($facture);
             }
+
             $chargement->setConnect($facture->getConnect());
             $chargement->setNumeroFacture('FACTURE-' . $facture->getId() );
             $chargement->setStatut('En cours');

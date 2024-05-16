@@ -300,39 +300,6 @@ class ChargementController extends AbstractController
         if ($produit){
 
             $p = $entityManager->getRepository(Produit::class)->find($produit);
-            $vendus = $p->getNbreVendu();
-            $nombre = $facture->getNombre();
-
-            if ($facture->getNomProduit() == $p->getNomProduitDetail()){
-
-                $repository->remove($facture);
-                $quantite = floatval($facture->getQuantite());
-                if ($quantite >= $nombre) {
-                    $boxe = $quantite / $nombre;
-                    $vendus = $boxe;
-                    $dstock = $p->getQtStock() + $vendus;
-                    $p->setQtStock($dstock);
-                    $p->setNbreVendu($vendus);
-                }else{
-                    $boxe = $quantite / $nombre;
-                    $vendus = $boxe;
-                    $dstock = $p->getQtStock() + $vendus;
-                    $p->setQtStock($dstock);
-                    $p->setNbreVendu($vendus);
-                }
-
-                //Mise à jour du quantité Stock détail de la produit
-                $upd = $p->getNombre() * $p->getQtStock();
-                $p->setQtStockDetail($upd);
-
-                //Mise à jour du total
-                $upddd = $p->getQtStock() * $p->getPrixUnit();
-                $p->setTotal($upddd);
-
-                $this->addFlash('success', $produit->getNomProduitDetail().' a été annulé avec succès.');
-                $entityManager->flush();
-            } else
-            {
 
                 $repository->remove($facture); // Mise à jour de l'état de la facture
 
@@ -340,13 +307,11 @@ class ChargementController extends AbstractController
                 $quantite = $facture->getQuantite();
                 $p->setQtStock($p->getQtStock() + $quantite);
                 $updProd = $p->getQtStock() * $p->getPrixUnit();
-                if ($p->getNombre() != null){
-                    $p->setQtStockDetail($p->getNombre() * $p->getQtStock());
-                }
+
                 $p->setTotal($updProd);
                 $this->addFlash('success', $produit->getLibelle().' a été annulé avec succès.');
                 $entityManager->flush();
-            }
+
 
             return $this->redirectToRoute('liste_chargement');
         }
