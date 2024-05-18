@@ -201,7 +201,7 @@ class DetteController extends AbstractController
         $pagination = $paginator->paginate(
             $results,
             $request->query->getInt('page', 1),
-            10
+            20
         );
 
         // Formatage des résultats paginés en tableau associatif
@@ -230,5 +230,4 @@ class DetteController extends AbstractController
             ],
         ]);
     }
-
 }

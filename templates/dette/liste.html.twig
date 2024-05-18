@@ -94,8 +94,7 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table">
-                        <thead>
+                        <table class="table table-bordered text-center">
                             <tr>
                                 <th>Nom client</th>
                                 <th>Montant</th>
@@ -104,35 +103,34 @@
                                 <th>Date</th>
                                 <th>action</th>
                             </tr>
-                        </thead
                             {% for d in pagination %}
                                 <tr>
-                                    <td>{{ d.client }}</td>
-                                    <td>{{ d.montantDette | number_format(0, ',', ' ') }}</td>
+                                    <th>{{ d.client }}</th>
+                                    <th>{{ d.montantDette | number_format(0, ',', ' ') }}</th>
                                     {% if is_numeric(d.reste) %}
-                                        <td style="color: {{ d.reste < 0 ? 'red' : 'inherit' }}">
+                                        <th style="color: {{ d.reste < 0 ? 'red' : 'inherit' }}">
                                             {{ d.reste < 0 ? -d.reste : d.reste | number_format(0, ',', ' ') }}
-                                        </td>
+                                        </th>
                                     {% else %}
-                                        <td>{{ d.reste }}</td>
+                                        <th>{{ d.reste }}</th>
                                     {% endif %}
-                                    <td>
+                                    <th>
                                         <a class="btn btn-primary btn-sm" style="background-color: {% if d.statut == 'payée' %}primary{% else %}#e74a3b{% endif %}; color: white; border: none; width: 100%; line-height: 10px; text-align: center;">
                                             {{ d.statut }}
                                         </a>
-                                    </td>
+                                    </th>
 
-                                    <td>{{ d.dateCreated | date('d/m/Y') }}</td>
-                                    <td>
-{#
+                                    <th>{{ d.dateCreated | date('d/m/Y') }}</th>
+                                    <th>
+                                        {#
                                         <a class="btn btn-primary btn-circle btn-sm" title="paiement" href="{{ path('paiement_add') }}" ><i class="fas fa-money-bill-alt"></i></a>
-#}
+                                        #}
                                         <a class="btn btn-info btn-circle btn-sm" title="info" href="javascript:void(0);" onclick="openPopup('{{ path('dette_info', {'id': d.id}) }}')" ><i class="fas fa-info-circle"></i></a>
                                         <a class="btn btn-warning btn-circle btn-sm" title="modifier" href="{{ path('edit_dette', {'id':d.id}) }}" "><i class="fa fa-edit" aria-hidden="true"></i> </a>
                                         <a class="btn btn-danger btn-circle btn-sm" title="supprimer" href="{{ path('dette_delete', {'id':d.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette dette ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
 
 
-                                    </td>
+                                    </th>
                                 </tr>
                             {% endfor %}
                         </table>

@@ -186,29 +186,6 @@ class FactureController extends AbstractController
             $entityManager->persist($chargement);
             $entityManager->flush();
 
-        $dette = new Dette();
-        $date = new \DateTime();
-        $dette->setMontantDette($chargement->getTotal());
-        $dette->setReste($chargement->getTotal());
-        $dette->setDateCreated($date);
-        $dette->setStatut('impayé');
-        $nomClient = $chargement->getNomClient();
-        $client = $entityManager->getRepository(Client::class)->findOneBy(['nom' => $nomClient]);
-        $dette->setClient($client);
-        $dette->setCommentaire('Dette de la facture');
-        $dettes = $entityManager->getRepository(Dette::class)->findAll();
-        foreach ( $dettes as $s) {
-            if ( $dette->getClient()->getNom() === $s->getClient()->getNom() && $s->getStatut() == "impayé" && $s->getReste() != 0) {
-                $chargement->setStatut('impayé');
-                $entityManager->flush();
-                $this->addFlash('danger',$s->getClient()->getNom().' a déjà une dette non payée.');
-                return $this->redirectToRoute('liste_chargement');
-            }
-        }
-
-        $entityManager->persist($dette);
-        $entityManager->flush();
-
         return $this->redirectToRoute('facture_liste');
 
     }

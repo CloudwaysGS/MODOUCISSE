@@ -78,14 +78,14 @@ class UserController extends AbstractController
     #[Route('/user/delete/{id}', name: 'user_delete')]
     public function delete(User $user, UserRepository $repository, EntityManagerInterface $entityManager){
 
-        $produits = $user->getProduits(); // récupérer tous les paiements associés à ce client
+        $produits = $user->getProduits(); // récupérer tous les produits associés à ce client
         foreach($produits as $produit){
-            $entityManager->remove($produit); // supprimer chaque paiement associé
+            $entityManager->remove($produit); // supprimer chaque produit associé
         }
 
-        $sorties = $user->getSorties(); // récupérer tous les paiements associés à ce client
+        $sorties = $user->getSorties(); // récupérer tous les sorties associés à ce client
         foreach($sorties as $sortie){
-            $entityManager->remove($sortie); // supprimer chaque paiement associé
+            $entityManager->remove($sortie); // supprimer chaque sortie associé
         }
 
         $entrees = $user->getEntrees(); // récupérer tous les paiements associés à ce client

@@ -14,6 +14,7 @@ use App\Repository\ChargementRepository;
 use App\Repository\FactureRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,40 +24,28 @@ use Symfony\Component\Routing\Annotation\Route;
 class ChargementController extends AbstractController
 {
     #[Route('/chargement', name: 'liste_chargement')]
-    public function index(ChargementRepository $charge, Request $request): Response
+    public function index(ChargementRepository $charge, Request $request, PaginatorInterface $paginator): Response
     {
-        $firstDayOfMonth = new \DateTime('first day of this month');
-        $lastDayOfMonth = new \DateTime('last day of this month');
-        $sumTotalMonth = $charge->createQueryBuilder('c')
-            ->select('SUM(c.total)')
-            ->where('c.date BETWEEN :startOfMonth AND :endOfMonth')
-            ->setParameter('startOfMonth', $firstDayOfMonth)
-            ->setParameter('endOfMonth', $lastDayOfMonth)
-            ->getQuery()
-            ->getSingleScalarResult();
-        $sumTotalMonth = is_null($sumTotalMonth) ? 0 : $sumTotalMonth;
-        $today = new DateTimeImmutable();
+
         $search = new Search();
         $form2 = $this->createForm(SearchType::class, $search);
         $form2->handleRequest($request);
         $nom = $search->getNom();
 
-        $chargement = $nom ? $charge->findByName($nom) : $charge->findAllOrderedByDate();
+        //$chargement = $nom ? $charge->findByName($nom) : $charge->findAllOrderedByDate();
 
-        $page = $request->query->getInt('page', 1);
-        $limit = 10; // number of products to display per page
-        $total = count($chargement);
-        $offset = ($page - 1) * $limit;
-        $chargement = array_slice($chargement, $offset, $limit);
+        $pagination = $paginator->paginate(
+            ($nom !== null && $nom !== '') ? $charge->findByName($nom) : $charge->findAllOrderedByDate(),
+            $request->query->get('page', 1),
+            10
+        );
         $f = null;
 
         return $this->render('chargement/index.html.twig', [
             'controller_name' => 'ChargementController',
-            'chargement' => $chargement,
-            'total' => $total,
-            'page' => $page,
-            'limit' => $limit,
-            'f' => $f
+            'pagination' => $pagination,
+            'f' => $f,
+            'form2' => $form2->createView(),
         ]);
     }
 
@@ -116,13 +105,17 @@ class ChargementController extends AbstractController
     #[Route('/chargement/user/{id}', name: 'chargement_user')]
     public function user($id, EntityManagerInterface $entityManager)
     {
-        $chargements = $entityManager->getRepository(Chargement::class)->find($id);
-        if (!$chargements) {
+        $chargement = $entityManager->getRepository(Chargement::class)->find($id);
+        if (!$chargement) {
             throw $this->createNotFoundException('Chargement non trouvé');
         }
-        $user = $chargements->getConnect();
-        
-        return new JsonResponse(['user' => $user]);
+
+        $user = $chargement->getConnect();
+
+        // Assurez-vous de retourner un tableau avec les clés 'nom' et 'email' (ou autres informations nécessaires)
+        return new JsonResponse([
+            'user' => $user,
+        ]);
     }
 
     #[Route('/chargement/pdf/{id}', name: 'pdf')]
@@ -258,24 +251,52 @@ class ChargementController extends AbstractController
     }
 
     #[Route('/chargement/statut/{id}', name: 'statut')]
-    public function statut(Chargement $chargement, EntityManagerInterface $entityManager){
+    public function statut(Request $request, Chargement $chargement, EntityManagerInterface $entityManager){
 
-        $chargement->setStatut('payée');
-        $nomChargement = $chargement->getNomClient();
-        $totalCharge = $chargement->getTotal();
-        $dettes = $entityManager->getRepository(Dette::class)->findAll();
-        foreach ($dettes as $dette){
-            $nomDette = $dette->getClient()->getNom();
-            $montantDette = $dette->getReste();
-            if ($nomChargement == $nomDette && $totalCharge == $montantDette){
-                $dette->setStatut("payée");
+        $prixAvance = $request->request->get('price');
+
+        if ($prixAvance) {
+            // Vous pouvez utiliser le prix ici, par exemple, le sauvegarder dans votre entité Chargement
+            $reste = $chargement->getTotal() - $prixAvance;
+
+            if ($reste == 0){
+                $chargement->setStatut('payée');
+                $entityManager->persist($chargement);
                 $entityManager->flush();
+                $this->addFlash('success', 'Le paiement de la facture a été effectué.');
+                return $this->redirectToRoute('liste_chargement');
+
+            }elseif ($reste > 0){
+                $dette = new Dette();
+                $date = new \DateTime();
+                $dette->setMontantDette($reste);
+                $dette->setReste($reste);
+                $dette->setDateCreated($date);
+                $dette->setStatut('impayé');
+                $nomClient = $chargement->getNomClient();
+                $client = $entityManager->getRepository(Client::class)->findOneBy(['nom' => $nomClient]);
+                $dette->setClient($client);
+                $dette->setCommentaire('Dette de la facture');
+                $dettes = $entityManager->getRepository(Dette::class)->findAll();
+
+                foreach ( $dettes as $s) {
+                    if ( $dette->getClient()->getNom() === $s->getClient()->getNom() && $s->getStatut() == "impayé" && $s->getReste() != 0) {
+                        $chargement->setStatut('impayé');
+                        $entityManager->flush();
+                        $this->addFlash('danger',$s->getClient()->getNom().' a déjà une dette non payée.');
+                        return $this->redirectToRoute('liste_chargement');
+                    }
+                    $entityManager->persist($dette);
+                    $entityManager->flush();
+                }
             }
 
+            $entityManager->persist($chargement);
+            $entityManager->flush();
+            $this->addFlash('success', 'Le paiement de la facture a été effectué.');
+        } else {
+            $this->addFlash('error', 'Le prix doit être renseigné.');
         }
-        $entityManager->persist($chargement);
-        $entityManager->flush();
-        $this->addFlash('success', 'Le paiement de la facture a été effectué.');
 
         return $this->redirectToRoute('liste_chargement');
     }

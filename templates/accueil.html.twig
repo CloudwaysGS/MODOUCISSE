@@ -50,15 +50,21 @@
                 </a>
             </li>
         {% endif %}
+        <hr class="sidebar-divider my-0">
+        {% if is_granted('ROLE_GESTION_STOCK') or is_granted('ROLE_VENDEUR') %}
+            <!-- Nav Item - Dashboard -->
+            <li class="nav-item active">
+                <a class="nav-link" href="{{ path('accueil') }}">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Statistiques</span>
+                </a>
+            </li>
+        {% endif %}
 
 
         <!-- Divider -->
         <hr class="sidebar-divider">
 
-        <!-- Heading -->
-        <div class="sidebar-heading">
-            Interface
-        </div>
 
         <!-- Nav Item - Pages Collapse Menu -->
         <li class="nav-item">

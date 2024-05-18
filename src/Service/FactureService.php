@@ -20,7 +20,7 @@ class FactureService
         $this->factureRepository = $factureRepository;
         $this->security = $security;
     }
-    public function createFacture( $id, $quantity, $clientId, $user, $clientIdDetail = null)
+    public function createFacture( $id, $quantity, $clientId, $user)
     {
         $factures = $this->entityManager->getRepository(Facture::class)->findBy(['etat' => 1]);
 

@@ -43,12 +43,10 @@ class Facture2Controller extends AbstractController
         $nom = $search->getNom();
 
         $produits = $nom ? $prod->findByName($nom) : $prod->findAllOrderedByDate();
-        $details = $prod->findAllDetail();
         $clients = $clientRepository->findAll();
 
         return $this->render('facture2/index.html.twig', [
             'produits' => $produits,
-            'details' => $details,
             'facture' => $factures,
             'clients' => $clients,
         ]);
@@ -70,20 +68,12 @@ class Facture2Controller extends AbstractController
             $this->addFlash('warning', 'Vous devez être connecté pour ajouter une facture.');
             return $this->redirectToRoute('login'); // Adjust the route to your login page
         }
-        $quantityDetail = null;
-        $clientIdDetail = null;
-        $actionType = $request->query->get('actionType', 'addToFacture');
-
-        if ($actionType == 'addToFactureDetail'){
-            $quantityDetail = $request->query->get('quantityDetail', 1);
-            $clientIdDetail = $request->query->get('clientIdDetail');
-        }
 
         $quantity = $request->query->get('quantity', 1);
         $clientId = $request->query->get('clientId');
 
         try {
-            $facture = $this->factureService->createFacture2($id, $quantity, $clientId, $user, $actionType, $quantityDetail, $clientIdDetail );
+            $facture = $this->factureService->createFacture2($id, $quantity, $clientId, $user);
             $total = $this->factureService->updateTotalForFactures();
 
             return $this->redirectToRoute('facture2_liste', ['total' => $total]);
@@ -116,22 +106,17 @@ class Facture2Controller extends AbstractController
         return $this->json($data);
     }
 
-    #[Route('/searchDetail2', name: 'searchDetail2')]
-    public function searchDetail(Request $request, ProduitRepository $prod, Security $security): JsonResponse
+    #[Route('/search-clients', name: 'search_clients')]
+    public function searchClients(Request $request, ClientRepository $clientRepository): JsonResponse
     {
-        $user = $security->getUser();
-        if (!$user) {
-            $this->addFlash('warning', 'Vous devez être connecté pour ajouter une facture.');
-            return $this->redirectToRoute('app_login');
-        }
         $searchTerm = $request->query->get('term');
-        $produits = $prod->findByNameDetail($searchTerm);
+        $clients = $clientRepository->findByNameClient($searchTerm);
+
         $data = [];
-        foreach ($produits as $produit) {
+        foreach ($clients as $client) {
             $data[] = [
-                'id' => $produit->getId(),
-                'nomProduitDetail' => $produit->getNomProduitDetail(),
-                'path' => $this->generateUrl('facture2_add', ['id' => $produit->getId()]),
+                'id' => $client->getId(),
+                'nom' => $client->getNom(),
             ];
         }
 
@@ -158,47 +143,6 @@ class Facture2Controller extends AbstractController
 
             $produit = $entityManager->getRepository(Produit::class)->find($produitId);
 
-            if ($facture->getNomProduit() == $produit->getNomProduitDetail()){
-                // Mettre à jour la facture avec les nouvelles données
-                $facture->setQuantite($quantiteNouvelle);
-                $facture->setNomProduit($produit->getNomProduitDetail());
-                $facture->setPrixUnit($prixUnit);
-                $facture->setMontant($quantiteNouvelle * $prixUnit);
-                // Mettre à jour la quantité en stock du produit
-                $quantiteStockActuelle = $produit->getQtStockDetail();
-                $nombre = $produit->getNombre();
-                if ($differenceQuantite > 0) {
-
-                    // Nouvelle quantité est supérieure à l'ancienne
-                    $nouvelleQuantiteStockDetail = $quantiteStockActuelle - $differenceQuantite;
-                    $nouvelleQuantiteStock = $nouvelleQuantiteStockDetail / $nombre;
-                    $nouvelleNombreVendu = $differenceQuantite / $nombre;
-
-                } elseif ($differenceQuantite < 0) {
-                    // Nouvelle quantité est inférieure à l'ancienne
-                    $nouvelleQuantiteStockDetail = $quantiteStockActuelle + abs($differenceQuantite);
-                    $nouvelleQuantiteStock = $nouvelleQuantiteStockDetail / $nombre;
-                    $nouvelleNombreVendu = abs($differenceQuantite) / $nombre;
-
-                } elseif ($differenceQuantite == 0) {
-                    // Nouvelle quantité est égale à l'ancienne
-                    $entityManager->flush();
-                    return $this->redirectToRoute('facture2_liste');
-                }
-                // Assurez-vous que la quantité en stock ne devient pas négative
-                $produit->setQtStockDetail(max(0, $nouvelleQuantiteStockDetail));
-                $produit->setQtStock($nouvelleQuantiteStock);
-                $produit->setNbreVendu($nouvelleNombreVendu);
-                $produit->setTotal($produit->getQtStock()* $produit->getPrixUnit());
-
-                $total = $this->factureService->updateTotalForFactures();
-                $facture->setTotal($total);
-                // Enregistrez les modifications
-                $entityManager->flush();
-
-                return $this->redirectToRoute('facture2_liste');
-            }
-
             // Mettre à jour la facture avec les nouvelles données
             $facture->setQuantite($quantiteNouvelle);
             $facture->setNomProduit($produit);
@@ -215,6 +159,9 @@ class Facture2Controller extends AbstractController
                 // Nouvelle quantité est inférieure à l'ancienne
                 $nouvelleQuantiteStock = $quantiteStockActuelle + abs($differenceQuantite);
             } elseif ($differenceQuantite == 0) {
+
+                $total = $this->factureService->updateTotalForFactures();
+                $facture->setTotal($total);
                 // Nouvelle quantité est égale à l'ancienne
                 $entityManager->flush();
                 return $this->redirectToRoute('facture2_liste');
@@ -223,9 +170,7 @@ class Facture2Controller extends AbstractController
             // Assurez-vous que la quantité en stock ne devient pas négative
             $produit->setQtStock(max(0, $nouvelleQuantiteStock));
             $produit->setTotal($produit->getQtStock()* $produit->getPrixUnit());
-            if ($produit->getNombre() != null){
-                $produit->setQtStockDetail($produit->getNombre() * $produit->getQtStock());
-            }
+
             $total = $this->factureService->updateTotalForFactures();
             $facture->setTotal($total);
             // Enregistrez les modifications
@@ -249,35 +194,7 @@ class Facture2Controller extends AbstractController
         $produit = $facture->getProduit()->first();
         if ($produit){
             $p = $entityManager->getRepository(Produit::class)->find($produit);
-            $vendu = $p->getNbreVendu();
-            $nombre = $facture->getNombre();
 
-            if ($facture->getNomProduit() == $p->getNomProduitDetail()){
-                $repository->remove($facture);
-                $quantite = floatval($facture->getQuantite());
-                if ($quantite >= $nombre) {
-                    $boxe = $quantite / $nombre;
-                    $vendus = $boxe;
-                    $dstock = $p->getQtStock() + $vendus;
-                    $p->setQtStock($dstock);
-                    $p->setNbreVendu($vendus);
-                }else{
-                    $boxe = $quantite / $nombre;
-                    $vendus = $boxe;
-                    $dstock = $p->getQtStock() + $vendus;
-                    $p->setQtStock($dstock);
-                    $p->setNbreVendu($vendus);
-                }
-                //Mise à jour du quantité Stock détail de la produit
-                $upd = $p->getNombre() * $p->getQtStock();
-                $p->setQtStockDetail($upd);
-
-                //Mise à jour du total
-                $upddd = $p->getQtStock() * $p->getPrixUnit();
-                $p->setTotal($upddd);
-
-                $this->addFlash('success', $produit->getNomProduitDetail().' a ete supprimée avec succès.');
-            } else {
                 $repository->remove($facture); // Mise à jour de l'état de la facture
 
                 //Mise à jour quantité stock produit et total produit
@@ -286,7 +203,6 @@ class Facture2Controller extends AbstractController
                 $updProd = $p->getQtStock() * $p->getPrixUnit();
                 $p->setTotal($updProd);
                 $this->addFlash('success', $produit->getLibelle().' a ete supprimée avec succès.');
-            }
 
             $entityManager->flush();
 
