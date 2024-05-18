@@ -10,6 +10,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use DateTime;
+use DateInterval;
+use Doctrine\ORM\Query\Expr;
+
 
 class AccueilController extends AbstractController
 {
@@ -41,12 +45,12 @@ class AccueilController extends AbstractController
         $twentyFourHoursAgo->modify('-24 hours');
 
         // Total des sorties effectuées depuis les dernières 24 heures jusqu'à maintenant
-        $sortie24H = $sort->createQueryBuilder('s')
+        /*$sortie24H = $sort->createQueryBuilder('s')
             ->select('COALESCE(SUM(s.total), 0)')
             ->where('s.dateSortie >= :today')
             ->setParameter('today', $currentDateTime)
             ->getQuery()
-            ->getSingleScalarResult();
+            ->getSingleScalarResult();*/
 
         // Total des produits achetés depuis minuit aujourd'hui (réinitialisation)
         $sumTotal24H = $charge->createQueryBuilder('c')
@@ -56,8 +60,37 @@ class AccueilController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult();
 
+
+        // Récupérer la date actuelle
+        $currentDate = new DateTime();
+
+        // Créer un tableau pour stocker les totaux vendus par jour
+        $totalsByDate = [];
+
+        // Boucler sur les dix derniers jours pour récupérer les totaux vendus pour chaque jour
+        for ($i = 0; $i < 10; $i++) {
+            // Calculer la date du jour en cours sans modifier la date actuelle
+            $date = (new DateTime())->sub(new DateInterval('P' . $i . 'D'))->format('Y-m-d');
+
+            // Récupérer la somme vendue pour cette date
+            $totalSold = $charge->createQueryBuilder('c')
+                ->select('COALESCE(SUM(c.total), 0)')
+                ->where('c.date >= :startOfDay')
+                ->andWhere('c.date < :endOfDay')
+                ->setParameter('startOfDay', new DateTime($date . ' 00:00:00'))
+                ->setParameter('endOfDay', new DateTime($date . ' 23:59:59'))
+                ->getQuery()
+                ->getSingleScalarResult();
+
+            // Ajouter la somme vendue au tableau avec la date correspondante
+            $totalsByDate[] = [
+                'date' => $date,
+                'totalSold' => $totalSold,
+            ];
+        }
+
         // Somme totale des sorties des 24 dernières heures et des produits achetés depuis minuit aujourd'hui
-        $sortietotal24H = $sortie24H + $sumTotal24H;
+        //$sortietotal24H = $sortie24H + $sumTotal24H;
 
 
         // obtenir la date de début et de fin du mois en cours
@@ -100,9 +133,10 @@ class AccueilController extends AbstractController
             'controller_name' => 'AccueilController',
             'total' => $total,
             'sortieTotalMonth' => $sortieTotalMonth,
-            'sortietotal24H' => $sortietotal24H,
+            'sumTotal24H' => $sumTotal24H,
             'entreetotal24H' => $entreetotal24H,
-        
+            'totalsByDate' => $totalsByDate,
+
         ]);
 
     }
