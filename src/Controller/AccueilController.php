@@ -22,7 +22,6 @@ class AccueilController extends AbstractController
                           SortieRepository $sort,
                           EntreeRepository $entree,
                           ChargementRepository $charge,
-                            EntityManagerInterface $entityManager
     ): Response
     {
 
@@ -31,6 +30,10 @@ class AccueilController extends AbstractController
             ->select('COALESCE(COUNT(p.id), 0)')
             ->getQuery()
             ->getSingleScalarResult();
+
+        $totalChargements = $charge->getTotalChargements();
+        $totalEntrees = $entree->findTotalEntrées();
+        $benefice = $totalChargements - $totalEntrees;
 
         $entreetotal24H = 0;
         $entreetotal = 0;
@@ -60,32 +63,37 @@ class AccueilController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult();
 
-
-        // Récupérer la date actuelle
-        $currentDate = new DateTime();
-
         // Créer un tableau pour stocker les totaux vendus par jour
         $totalsByDate = [];
 
         // Boucler sur les dix derniers jours pour récupérer les totaux vendus pour chaque jour
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 5; $i++) {
             // Calculer la date du jour en cours sans modifier la date actuelle
             $date = (new DateTime())->sub(new DateInterval('P' . $i . 'D'))->format('Y-m-d');
 
             // Récupérer la somme vendue pour cette date
-            $totalSold = $charge->createQueryBuilder('c')
-                ->select('COALESCE(SUM(c.total), 0)')
+            $queryBuilder = $charge->createQueryBuilder('c')
+                ->select('
+            COALESCE(SUM(c.total), 0) AS totalSold,
+            COALESCE(COUNT(c.id), 0) AS salesCount,
+            COALESCE(MAX(c.total), 0) AS maxSale,
+            COALESCE(MIN(c.total), 0) AS minSale
+        ')
                 ->where('c.date >= :startOfDay')
                 ->andWhere('c.date < :endOfDay')
                 ->setParameter('startOfDay', new DateTime($date . ' 00:00:00'))
-                ->setParameter('endOfDay', new DateTime($date . ' 23:59:59'))
-                ->getQuery()
-                ->getSingleScalarResult();
+                ->setParameter('endOfDay', new DateTime($date . ' 23:59:59'));
+
+            // Exécuter la requête et obtenir les résultats
+            $result = $queryBuilder->getQuery()->getSingleResult();
 
             // Ajouter la somme vendue au tableau avec la date correspondante
             $totalsByDate[] = [
                 'date' => $date,
-                'totalSold' => $totalSold,
+                'totalSold' => $result['totalSold'],
+                'salesCount' => $result['salesCount'],
+                'maxSale' => $result['maxSale'],
+                'minSale' => $result['minSale'],
             ];
         }
 
@@ -136,7 +144,7 @@ class AccueilController extends AbstractController
             'sumTotal24H' => $sumTotal24H,
             'entreetotal24H' => $entreetotal24H,
             'totalsByDate' => $totalsByDate,
-
+            'benefice' => $benefice,
         ]);
 
     }

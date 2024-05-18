@@ -50,16 +50,7 @@
                 </a>
             </li>
         {% endif %}
-        <hr class="sidebar-divider my-0">
-        {% if is_granted('ROLE_GESTION_STOCK') or is_granted('ROLE_VENDEUR') %}
-            <!-- Nav Item - Dashboard -->
-            <li class="nav-item active">
-                <a class="nav-link" href="{{ path('accueil') }}">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>Statistiques</span>
-                </a>
-            </li>
-        {% endif %}
+
 
 
         <!-- Divider -->
@@ -328,6 +319,7 @@
                     <!-- Content Row -->
                     <div class="row">
                         <!-- Earnings (Monthly) Card Example -->
+
                         <div class="col-xl-3 col-md-6 mb-4">
                             <div class="card border-left-primary shadow h-100 py-2">
                                 <div class="card-body">
@@ -397,6 +389,25 @@
                             </div>
                         </div>
 
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-primary shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                BENEFICE</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ benefice | number_format(0, ',', ' ') }}</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
                     </div>
 
                     <div class="row">
@@ -404,7 +415,7 @@
                         <!-- Area Chart -->
                         <div class="col-xl-8 col-lg-7">
                             <div class="card shadow mb-4">
-                                <div class="container mt-5">
+                                <div class="container mt-3">
                                     <h4 class="text-center">Somme Vendue des Dix Derniers Jours</h4>
                                     <div class="table-responsive">
                                         <table class="table table-bordered table-striped">
@@ -412,6 +423,9 @@
                                             <tr>
                                                 <th>Date</th>
                                                 <th>Somme Vendue (en FCA)</th>
+                                                <th>Nbre de Ventes</th>
+                                                <th>Vente Max (en FCA)</th>
+                                                <th>Vente Min (en FCA)</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -419,17 +433,17 @@
                                                 <tr>
                                                     <td>{{ total.date }}</td>
                                                     <td>{{ total.totalSold|number_format(2, ',', ' ') }}</td>
+                                                    <td>{{ total.salesCount }}</td>
+                                                    <td>{{ total.maxSale|number_format(2, ',', ' ') }}</td>
+                                                    <td>{{ total.minSale|number_format(2, ',', ' ') }}</td>
                                                 </tr>
                                             {% endfor %}
                                             </tbody>
                                         </table>
+
                                     </div>
                                 </div>
 
-                                <!-- Card Header - Dropdown -->
-
-
-                                <!-- Card Body -->
 
                             </div>
                         </div>

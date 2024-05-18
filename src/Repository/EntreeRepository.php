@@ -47,14 +47,16 @@ class EntreeRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    // src/Repository/EntreeRepository.php
 
-    public function countAll(): int
+    public function findTotalEntrées(): float
     {
-        $qb = $this->createQueryBuilder('p');
-        $qb->select('COUNT(p)');
-        $query = $qb->getQuery();
-        return $query->getSingleScalarResult();
+        return $this->createQueryBuilder('e')
+            ->select('SUM(e.total) as total')
+            ->getQuery()
+            ->getSingleScalarResult();
     }
+
 
 //    /**
 //     * @return Entree[] Returns an array of Entree objects

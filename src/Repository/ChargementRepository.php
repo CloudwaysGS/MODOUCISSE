@@ -57,13 +57,14 @@ class ChargementRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function countAll(): int
+    public function getTotalChargements(): float
     {
-        $qb = $this->createQueryBuilder('c');
-        $qb->select('COUNT(c)');
-        $query = $qb->getQuery();
-        return $query->getSingleScalarResult();
+        return $this->createQueryBuilder('c')
+            ->select('COALESCE(SUM(c.total), 0) AS totalChargements')
+            ->getQuery()
+            ->getSingleScalarResult();
     }
+
 
 
 
