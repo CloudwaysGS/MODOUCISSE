@@ -98,7 +98,7 @@ class ChargementController extends AbstractController
         $entityManager->remove($chargements); // supprimer le chargement après avoir supprimé toutes les factures associées
         $entityManager->flush();
 
-        $this->addFlash('success', 'Le chargement a été supprimé avec succès');
+        $this->addFlash('success', 'La facture a été supprimé avec succès');
         return $this->redirectToRoute('liste_chargement');
     }
 
@@ -263,7 +263,7 @@ class ChargementController extends AbstractController
                 $chargement->setStatut('payée');
                 $entityManager->persist($chargement);
                 $entityManager->flush();
-                $this->addFlash('success', 'Le paiement de la facture a été effectué.');
+                $this->addFlash('success', 'Le règlement de la facture a été effectué.');
                 return $this->redirectToRoute('liste_chargement');
 
             }elseif ($reste > 0){
@@ -286,9 +286,10 @@ class ChargementController extends AbstractController
                         $this->addFlash('danger',$s->getClient()->getNom().' a déjà une dette non payée.');
                         return $this->redirectToRoute('liste_chargement');
                     }
-                    $entityManager->persist($dette);
-                    $entityManager->flush();
                 }
+
+                $entityManager->persist($dette);
+                $entityManager->flush();
             }
 
             $entityManager->persist($chargement);

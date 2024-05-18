@@ -99,6 +99,8 @@ class ProduitController extends AbstractController
             $form->getData()->setTotal($update);
             $entityManager->persist($form->getData());
            $entityManager->flush();
+            $this->addFlash('success', 'produit modifié avec succès');
+
             return $this->redirectToRoute("produit_liste");
         }
 

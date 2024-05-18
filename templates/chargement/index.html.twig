@@ -41,15 +41,17 @@
                                 </th>
 
                                 <th>
-                                    <a class="popup-link" title="payée" href="#" data-toggle="modal" data-target="#userModal" data-id="{{ c.id }}"><i class="fa fa-money-bill-alt"></i></a>
-                                    <a class="popup-link" title="facture détaillée" href="javascript:void(0);" onclick="openPopup('{{ path('extraire', {'id': c.id}) }}')"><i class="fa fa-download"></i></a>
-                                    <a title="extraire en pdf" href="{{ path('pdf', {'id':c.id}) }}"><i class="fa fa-file-pdf"></i></a>
-                                    <a title="user" href="#" data-toggle="modal" data-target="#userModal1" data-user-id="{{ c.id }}">
+                                    <a class="popup-link btn btn-primary {% if c.statut == 'payée' or c.statut == 'impayé' %} disabled {% endif %}" title="payée" href="#" data-toggle="modal" data-target="#userModal" data-id="{{ c.id }}">
+                                        <i class="fa fa-money-bill-alt"></i>
+                                    </a>
+                                    <a class="popup-link btn btn-primary" title="facture détaillée" href="javascript:void(0);" onclick="openPopup('{{ path('extraire', {'id': c.id}) }}')"><i class="fa fa-download"></i></a>
+                                    <a class="popup-link btn btn-primary" title="extraire en pdf" href="{{ path('pdf', {'id':c.id}) }}"><i class="fa fa-file-pdf"></i></a>
+                                    <a class="popup-link btn btn-primary" title="user" href="#" data-toggle="modal" data-target="#userModal1" data-user-id="{{ c.id }}">
                                         <i class="fa fa-user" aria-hidden="true"></i>
                                     </a>
 
                                     {% if is_granted('ROLE_GESTION_STOCK') %}
-                                    <a title="supprimer" href="{{ path('chargement_delete', {'id':c.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette facture ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                    <a class="popup-link btn btn-primary" title="supprimer" href="{{ path('chargement_delete', {'id':c.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette facture ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
                                     {% endif %}
                                 </th>
                             </tr>
