@@ -41,7 +41,7 @@
                                 </th>
 
                                 <th>
-                                    <a class="popup-link btn btn-primary {% if c.statut == 'payée' or c.statut == 'impayé' %} disabled {% endif %}" title="payée" href="#" data-toggle="modal" data-target="#userModal" data-id="{{ c.id }}">
+                                    <a class="popup-link btn btn-primary {% if c.statut == 'payée' %} disabled {% endif %}" title="payée" href="#" data-toggle="modal" data-target="#userModal" data-id="{{ c.id }}">
                                         <i class="fa fa-money-bill-alt"></i>
                                     </a>
                                     <a class="popup-link btn btn-primary" title="facture détaillée" href="javascript:void(0);" onclick="openPopup('{{ path('extraire', {'id': c.id}) }}')"><i class="fa fa-download"></i></a>
@@ -54,6 +54,10 @@
                                     <a class="popup-link btn btn-primary" title="supprimer" href="{{ path('chargement_delete', {'id':c.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette facture ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
                                     {% endif %}
                                 </th>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="3">Aucun enregistrement trouvé</td>
                             </tr>
                         {% endfor %}
                     </table>

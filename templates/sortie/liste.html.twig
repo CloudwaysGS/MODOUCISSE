@@ -102,6 +102,10 @@
                                         <a class="btn btn-danger btn-circle btn-sm" href="{{ path('sortie_delete', {'id': s.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');" ><i class="fa fa-trash" aria-hidden="true"></i></a>
                                     </td>
                                 </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="3">Aucun enregistrement trouvé</td>
+                                </tr>
                             {% endfor %}
 
                         </table>

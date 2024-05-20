@@ -320,22 +320,6 @@
                     <div class="row">
                         <!-- Earnings (Monthly) Card Example -->
 
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="card border-left-primary shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                TOTAL(PRODUITS)</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total | number_format(0, ',', ' ') }}</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
                         <div class="col-xl-3 col-md-6 mb-4">
                             <div class="card border-left-success shadow h-100 py-2">
@@ -344,7 +328,7 @@
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                                 VENDU (AUJOURD'HUI)</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ sumTotal24H | number_format(0, ',', ' ') }}</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
@@ -372,22 +356,6 @@
                         </div>
 
                         {% if is_granted('ROLE_GESTION_STOCK') %}
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="card border-left-warning shadow h-100 py-2">
-                                <div class="card-body">
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col mr-2">
-                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                                VENDU (MENSUEL)</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ sortieTotalMonth | number_format(0, ',', ' ') }}</div>
-                                        </div>
-                                        <div class="col-auto">
-                                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
                         <div class="col-xl-3 col-md-6 mb-4">
                             <div class="card border-left-primary shadow h-100 py-2">
@@ -456,8 +424,19 @@
                                             {% endfor %}
                                             </tbody>
                                         </table>
+                                        <div class="pagination">
+                                            {% if currentPage > 1 %}
+                                                <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({'page': currentPage - 1})) }}">Précédent</a>
+                                            {% endif %}
 
+                                            Page {{ currentPage }} sur {{ totalPages }}
+
+                                            {% if currentPage < totalPages %}
+                                                <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({'page': currentPage + 1})) }}">Suivant</a>
+                                            {% endif %}
+                                        </div>
                                     </div>
+
                                 </div>
 
 
@@ -486,6 +465,43 @@
                                         </span>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-8 col-lg-7">
+                            <div class="card shadow mb-4">
+                                <div class="container mt-3">
+                                    <h4 class="text-center">Somme Vendue des Dix Derniers Jours</h4>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped">
+                                            <thead class="thead-dark">
+                                            <tr>
+                                                <th>Mois</th>
+                                                <th>Total vendu</th>
+                                                <th>Nombre de ventes</th>
+                                                <th>Vente maximale</th>
+                                                <th>Vente minimale</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for total in totalsByMonth %}
+                                                <tr>
+                                                    <td>{{ total.month }}</td>
+                                                    <td>{{ total.totalSold }}</td>
+                                                    <td>{{ total.salesCount }}</td>
+                                                    <td>{{ total.maxSale }}</td>
+                                                    <td>{{ total.minSale }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+
+
+                                    </div>
+
+                                </div>
+
+
                             </div>
                         </div>
                     </div>

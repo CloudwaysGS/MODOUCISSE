@@ -275,21 +275,26 @@ class ChargementController extends AbstractController
                 $dette->setStatut('impayé');
                 $nomClient = $chargement->getNomClient();
                 $client = $entityManager->getRepository(Client::class)->findOneBy(['nom' => $nomClient]);
-                $dette->setClient($client);
-                $dette->setCommentaire('Dette de la facture');
-                $dettes = $entityManager->getRepository(Dette::class)->findAll();
 
-                foreach ( $dettes as $s) {
-                    if ( $dette->getClient()->getNom() === $s->getClient()->getNom() && $s->getStatut() == "impayé" && $s->getReste() != 0) {
-                        $chargement->setStatut('impayé');
-                        $entityManager->flush();
-                        $this->addFlash('danger',$s->getClient()->getNom().' a déjà une dette non payée.');
-                        return $this->redirectToRoute('liste_chargement');
+                if ($client) {
+                    $dette->setClient($client);
+                    $dettes = $entityManager->getRepository(Dette::class)->findAll();
+
+                    foreach ($dettes as $s) {
+                        if ($dette->getClient()->getNom() === $s->getClient()->getNom() && $s->getStatut() == "impayé" && $s->getReste() != 0) {
+                            $chargement->setStatut('impayé');
+                            $entityManager->flush();
+                            $this->addFlash('danger', $s->getClient()->getNom() . ' a déjà une dette non payée.');
+                            return $this->redirectToRoute('liste_chargement');
+                        }
                     }
+                    $entityManager->persist($dette);
+                    $entityManager->flush();
+                }else {
+                    $this->addFlash('danger', 'Client non trouvé.');
+                    return $this->redirectToRoute('liste_chargement');
                 }
 
-                $entityManager->persist($dette);
-                $entityManager->flush();
             }
 
             $entityManager->persist($chargement);
@@ -313,6 +318,7 @@ class ChargementController extends AbstractController
             return $this->render('chargement/extraire.html.twig', ['f' => $f]);
         }
     }
+
     #[Route('/chargement/retour_produit/{id}', name: 'retour_produit')]
     public function retourProduit(Facture $facture, FactureRepository $repository, EntityManagerInterface $entityManager)
     {

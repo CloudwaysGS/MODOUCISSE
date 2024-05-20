@@ -245,6 +245,10 @@
                                     </td>
                                 </tr>
                                 {% set total = total + f.montant %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="3">Aucun enregistrement trouvé dans facture</td>
+                                </tr>
                             {% endfor %}
                             <td>Total</td>
                             <td></td>

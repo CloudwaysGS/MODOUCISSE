@@ -59,13 +59,6 @@ class ProduitRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function paginationQuery()
-    {
-        return $this->createQueryBuilder('p')
-            ->orderBy('p.libelle', 'ASC')
-            ->getQuery();
-    }
-
 
 //    /**
 //     * @return Produit[] Returns an array of Produit objects

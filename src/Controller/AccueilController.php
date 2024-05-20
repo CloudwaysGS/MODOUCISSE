@@ -8,6 +8,7 @@ use App\Repository\ProduitRepository;
 use App\Repository\SortieRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use DateTime;
@@ -22,21 +23,9 @@ class AccueilController extends AbstractController
                           SortieRepository $sort,
                           EntreeRepository $entree,
                           ChargementRepository $charge,
+                            Request $request,
     ): Response
     {
-
-        //Compte nombre de produit
-        $total = $prod->createQueryBuilder('p')
-            ->select('COALESCE(COUNT(p.id), 0)')
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        $totalChargements = $charge->getTotalChargements();
-        $totalEntrees = $entree->findTotalEntrées();
-        $benefice = $totalChargements - $totalEntrees;
-
-        $entreetotal24H = 0;
-        $entreetotal = 0;
 
         // Date et heure actuelle
         $currentDateTime = new \DateTime();
@@ -47,14 +36,6 @@ class AccueilController extends AbstractController
         $twentyFourHoursAgo = clone $currentDateTime;
         $twentyFourHoursAgo->modify('-24 hours');
 
-        // Total des sorties effectuées depuis les dernières 24 heures jusqu'à maintenant
-        /*$sortie24H = $sort->createQueryBuilder('s')
-            ->select('COALESCE(SUM(s.total), 0)')
-            ->where('s.dateSortie >= :today')
-            ->setParameter('today', $currentDateTime)
-            ->getQuery()
-            ->getSingleScalarResult();*/
-
         // Total des produits achetés depuis minuit aujourd'hui (réinitialisation)
         $sumTotal24H = $charge->createQueryBuilder('c')
             ->select('COALESCE(SUM(c.total), 0)')
@@ -63,11 +44,17 @@ class AccueilController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult();
 
-        // Créer un tableau pour stocker les totaux vendus par jour
+        // Définir le nombre total de jours et d'éléments par page
+        $totalDays = 100;
+        $itemsPerPage = 5;
+
+        $page = $request->query->getInt('page', 1);
+        $offset = ($page - 1) * $itemsPerPage;
+
         $totalsByDate = [];
 
-        // Boucler sur les dix derniers jours pour récupérer les totaux vendus pour chaque jour
-        for ($i = 0; $i < 5; $i++) {
+        // Boucler sur les jours de la page actuelle pour récupérer les totaux vendus pour chaque jour
+        for ($i = $offset; $i < $offset + $itemsPerPage && $i < $totalDays; $i++) {
             // Calculer la date du jour en cours sans modifier la date actuelle
             $date = (new DateTime())->sub(new DateInterval('P' . $i . 'D'))->format('Y-m-d');
 
@@ -96,35 +83,55 @@ class AccueilController extends AbstractController
                 'minSale' => $result['minSale'],
             ];
         }
+        // Calculer le nombre total de pages
+        $totalPages = ceil($totalDays / $itemsPerPage);
 
-        // Somme totale des sorties des 24 dernières heures et des produits achetés depuis minuit aujourd'hui
-        //$sortietotal24H = $sortie24H + $sumTotal24H;
 
 
-        // obtenir la date de début et de fin du mois en cours
-        $firstDayOfMonth = date('Y-m-01');
-        $lastDayOfMonth = date('Y-m-t');
 
-// Vérifier si la date actuelle est égale à la dernière journée du mois
+        // Définir le nombre total de mois et d'éléments par page
+        $totalMonths = 12;
+        $itemsPerPage = 5;
 
-            $sumTotalMonth = $charge->createQueryBuilder('c')
-                ->select('COALESCE(SUM(c.total), 0)')
-                ->where('c.date BETWEEN :startOfMonth AND :endOfMonth')
-                ->setParameter('startOfMonth', $firstDayOfMonth)
-                ->setParameter('endOfMonth', $lastDayOfMonth . ' 23:59:59')
-                ->getQuery()
-                ->getSingleScalarResult();
+        $page = $request->query->getInt('page', 1);
+        $offset = ($page - 1) * $itemsPerPage;
 
-            $sortieTotalMonthQuery = $sort->createQueryBuilder('s')
-                ->select('COALESCE(SUM(s.total), 0)')
-                ->where('s.dateSortie BETWEEN :startOfMonth AND :endOfMonth')
-                ->setParameter('startOfMonth', $firstDayOfMonth)
-                ->setParameter('endOfMonth', $lastDayOfMonth . ' 23:59:59')
-                ->getQuery();
+        $totalsByMonth = [];
 
-            $sortieTotalMonth = $sortieTotalMonthQuery->getSingleScalarResult();
-            $sortieTotalMonth += $sumTotalMonth;
+// Boucler sur les mois de la page actuelle pour récupérer les totaux vendus pour chaque mois
+        for ($i = $offset; $i < $offset + $itemsPerPage && $i < $totalMonths; $i++) {
+            // Calculer le début et la fin du mois en cours
+            $startOfMonth = (new DateTime("first day of -$i month"))->setTime(0, 0, 0);
+            $endOfMonth = (new DateTime("last day of -$i month"))->setTime(23, 59, 59);
 
+            // Récupérer la somme vendue pour ce mois
+            $queryBuilder = $charge->createQueryBuilder('c')
+                ->select('
+            COALESCE(SUM(c.total), 0) AS totalSold,
+            COALESCE(COUNT(c.id), 0) AS salesCount,
+            COALESCE(MAX(c.total), 0) AS maxSale,
+            COALESCE(MIN(c.total), 0) AS minSale
+        ')
+                ->where('c.date >= :startOfMonth')
+                ->andWhere('c.date <= :endOfMonth')
+                ->setParameter('startOfMonth', $startOfMonth)
+                ->setParameter('endOfMonth', $endOfMonth);
+
+            // Exécuter la requête et obtenir les résultats
+            $result = $queryBuilder->getQuery()->getSingleResult();
+
+            // Ajouter la somme vendue au tableau avec le mois correspondant
+            $totalsByMonth[] = [
+                'month' => $startOfMonth->format('Y-m'),
+                'totalSold' => $result['totalSold'],
+                'salesCount' => $result['salesCount'],
+                'maxSale' => $result['maxSale'],
+                'minSale' => $result['minSale'],
+            ];
+        }
+
+        // Calculer le nombre total de pages
+        $totalPages = ceil($totalMonths / $itemsPerPage);
 
 
         // Somme totale des entrées des dernières 24 heures
@@ -136,14 +143,18 @@ class AccueilController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult();
 
-       
+        $totalChargements = $charge->getTotalChargements();
+        $totalEntrees = $entree->findTotalEntrées();
+        $benefice = $totalChargements - $totalEntrees;
+
         return $this->render('accueil.html.twig', [
             'controller_name' => 'AccueilController',
-            'total' => $total,
-            'sortieTotalMonth' => $sortieTotalMonth,
             'sumTotal24H' => $sumTotal24H,
             'entreetotal24H' => $entreetotal24H,
             'totalsByDate' => $totalsByDate,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'totalsByMonth' => $totalsByMonth,
             'benefice' => $benefice,
         ]);
 
