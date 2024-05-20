@@ -400,7 +400,7 @@
                         <div class="col-xl-8 col-lg-7">
                             <div class="card shadow mb-4">
                                 <div class="container mt-3">
-                                    <h4 class="text-center">Somme Vendue des Dix Derniers Jours</h4>
+                                    <h4 class="text-center">Somme Vendue des Cinq Derniers Jours</h4>
                                     <div class="table-responsive">
                                         <table class="table table-bordered table-striped">
                                             <thead class="thead-dark">
@@ -471,7 +471,7 @@
                         <div class="col-xl-8 col-lg-7">
                             <div class="card shadow mb-4">
                                 <div class="container mt-3">
-                                    <h4 class="text-center">Somme Vendue des Dix Derniers Jours</h4>
+                                    <h4 class="text-center">Somme Vendue pour Chaque Mois</h4>
                                     <div class="table-responsive">
                                         <table class="table table-bordered table-striped">
                                             <thead class="thead-dark">
@@ -495,7 +495,64 @@
                                             {% endfor %}
                                             </tbody>
                                         </table>
+                                        <div class="pagination">
+                                            {% if currentPage > 1 %}
+                                                <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({'page': currentPage - 1})) }}">Précédent</a>
+                                            {% endif %}
 
+                                            Page {{ currentPage }} sur {{ totalPages }}
+
+                                            {% if currentPage < totalPages %}
+                                                <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({'page': currentPage + 1})) }}">Suivant</a>
+                                            {% endif %}
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+                        </div>
+
+                        <div class="col-xl-8 col-lg-7">
+                            <div class="card shadow mb-4">
+                                <div class="container mt-3">
+                                    <h4 class="text-center">Somme Vendue par Année</h4>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped">
+                                            <thead class="thead-dark">
+                                            <tr>
+                                                <th>Années</th>
+                                                <th>Total vendu</th>
+                                                <th>Nombre de ventes</th>
+                                                <th>Vente maximale</th>
+                                                <th>Vente minimale</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for total in totalsByYear %}
+                                                <tr>
+                                                    <td>{{ total.year }}</td>
+                                                    <td>{{ total.totalSold }}</td>
+                                                    <td>{{ total.salesCount }}</td>
+                                                    <td>{{ total.maxSale }}</td>
+                                                    <td>{{ total.minSale }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                        <div class="pagination">
+                                            {% if currentPage > 1 %}
+                                                <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({'page': currentPage - 1})) }}">Précédent</a>
+                                            {% endif %}
+
+                                            Page {{ currentPage }} sur {{ totalPages }}
+
+                                            {% if currentPage < totalPages %}
+                                                <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({'page': currentPage + 1})) }}">Suivant</a>
+                                            {% endif %}
+                                        </div>
 
                                     </div>
 

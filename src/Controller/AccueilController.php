@@ -98,7 +98,7 @@ class AccueilController extends AbstractController
 
         $totalsByMonth = [];
 
-// Boucler sur les mois de la page actuelle pour récupérer les totaux vendus pour chaque mois
+        // Boucler sur les mois de la page actuelle pour récupérer les totaux vendus pour chaque mois
         for ($i = $offset; $i < $offset + $itemsPerPage && $i < $totalMonths; $i++) {
             // Calculer le début et la fin du mois en cours
             $startOfMonth = (new DateTime("first day of -$i month"))->setTime(0, 0, 0);
@@ -133,6 +133,56 @@ class AccueilController extends AbstractController
         // Calculer le nombre total de pages
         $totalPages = ceil($totalMonths / $itemsPerPage);
 
+        // Définir le nombre total d'années et d'éléments par page
+        $totalYears = 10; // Vous pouvez ajuster ce nombre en fonction de vos besoins
+        $itemsPerPage = 5;
+
+        $page = $request->query->getInt('page', 1);
+        $offset = ($page - 1) * $itemsPerPage;
+
+        $totalsByYear = [];
+
+        // Boucler sur les années de la page actuelle pour récupérer les totaux vendus pour chaque année
+        for ($i = $offset; $i < $offset + $itemsPerPage && $i < $totalYears; $i++) {
+            // Calculer l'année en cours sans modifier l'année actuelle
+            $year = (new DateTime())->sub(new DateInterval('P' . $i . 'Y'))->format('Y');
+
+            // Définir les dates de début et de fin de l'année
+            $startOfYear = new DateTime($year . '-01-01 00:00:00');
+            $endOfYear = new DateTime($year . '-12-31 23:59:59');
+
+            // Récupérer la somme vendue pour cette année
+            $queryBuilder = $charge->createQueryBuilder('c')
+                ->select('
+            COALESCE(SUM(c.total), 0) AS totalSold,
+            COALESCE(COUNT(c.id), 0) AS salesCount,
+            COALESCE(MAX(c.total), 0) AS maxSale,
+            COALESCE(MIN(c.total), 0) AS minSale
+        ')
+                ->where('c.date >= :startOfYear')
+                ->andWhere('c.date <= :endOfYear')
+                ->setParameter('startOfYear', $startOfYear)
+                ->setParameter('endOfYear', $endOfYear);
+
+            // Exécuter la requête et obtenir les résultats
+            $result = $queryBuilder->getQuery()->getSingleResult();
+
+            // Ajouter la somme vendue au tableau avec l'année correspondante
+            $totalsByYear[] = [
+                'year' => $year,
+                'totalSold' => $result['totalSold'],
+                'salesCount' => $result['salesCount'],
+                'maxSale' => $result['maxSale'],
+                'minSale' => $result['minSale'],
+            ];
+        }
+
+    // Calculer le nombre total de pages
+        $totalPages = ceil($totalYears / $itemsPerPage);
+
+    // Vous pouvez ensuite utiliser $totalsByYear pour afficher les résultats paginés
+
+
 
         // Somme totale des entrées des dernières 24 heures
         $twentyFourHoursAgo = new \DateTime('-24 hours');
@@ -155,6 +205,7 @@ class AccueilController extends AbstractController
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'totalsByMonth' => $totalsByMonth,
+            'totalsByYear' => $totalsByYear,
             'benefice' => $benefice,
         ]);
 
