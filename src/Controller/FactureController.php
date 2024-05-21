@@ -186,7 +186,7 @@ class FactureController extends AbstractController
             $entityManager->persist($chargement);
             $entityManager->flush();
 
-        return $this->redirectToRoute('facture_liste');
+        return $this->redirectToRoute('liste_chargement');
 
     }
 

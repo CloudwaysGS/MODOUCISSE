@@ -49,6 +49,12 @@ class Chargement
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $statut = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0', nullable: true)]
+    private ?string $avance = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0', nullable: true)]
+    private ?string $reste = null;
+
     public function __construct()
     {
         $this->facture = new ArrayCollection();
@@ -227,6 +233,30 @@ class Chargement
     public function setStatut(?string $statut): self
     {
         $this->statut = $statut;
+
+        return $this;
+    }
+
+    public function getAvance(): ?string
+    {
+        return $this->avance;
+    }
+
+    public function setAvance(?string $avance): self
+    {
+        $this->avance = $avance;
+
+        return $this;
+    }
+
+    public function getReste(): ?string
+    {
+        return $this->reste;
+    }
+
+    public function setReste(?string $reste): self
+    {
+        $this->reste = $reste;
 
         return $this;
     }

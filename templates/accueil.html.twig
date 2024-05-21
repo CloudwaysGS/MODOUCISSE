@@ -327,7 +327,7 @@
                                     <div class="row no-gutters align-items-center">
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                                VENDU (AUJOURD'HUI)</div>
+                                                CAISSE </div>
                                             <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
                                         </div>
                                         <div class="col-auto">
@@ -425,15 +425,15 @@
                                             </tbody>
                                         </table>
                                         <div class="pagination">
-                                            {% if currentPage > 1 %}
-                                                <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({'page': currentPage - 1})) }}">Précédent</a>
-                                            {% endif %}
-
-                                            Page {{ currentPage }} sur {{ totalPages }}
-
-                                            {% if currentPage < totalPages %}
-                                                <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({'page': currentPage + 1})) }}">Suivant</a>
-                                            {% endif %}
+                                            <span>Page {{ currentPage }} of {{ totalDailyPages }}</span>
+                                            <div>
+                                                {% if currentPage > 1 %}
+                                                    <a href="{{ path(app.request.attributes.get('_route'), {page: currentPage - 1}) }}">Previous</a>
+                                                {% endif %}
+                                                {% if currentPage < totalDailyPages %}
+                                                    <a href="{{ path(app.request.attributes.get('_route'), {page: currentPage + 1}) }}">Next</a>
+                                                {% endif %}
+                                            </div>
                                         </div>
                                     </div>
 
@@ -496,15 +496,16 @@
                                             </tbody>
                                         </table>
                                         <div class="pagination">
-                                            {% if currentPage > 1 %}
-                                                <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({'page': currentPage - 1})) }}">Précédent</a>
-                                            {% endif %}
+                                            <span>Page {{ currentPage }} of {{ totalMonthlyPages }}</span>
+                                            <div>
+                                                {% if currentPage > 1 %}
+                                                    <a href="{{ path(app.request.attributes.get('_route'), {page: currentPage - 1}) }}">Previous</a>
+                                                {% endif %}
+                                                {% if currentPage < totalMonthlyPages %}
+                                                    <a href="{{ path(app.request.attributes.get('_route'), {page: currentPage + 1}) }}">Next</a>
+                                                {% endif %}
+                                            </div>
 
-                                            Page {{ currentPage }} sur {{ totalPages }}
-
-                                            {% if currentPage < totalPages %}
-                                                <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({'page': currentPage + 1})) }}">Suivant</a>
-                                            {% endif %}
                                         </div>
 
                                     </div>
@@ -543,15 +544,15 @@
                                             </tbody>
                                         </table>
                                         <div class="pagination">
-                                            {% if currentPage > 1 %}
-                                                <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({'page': currentPage - 1})) }}">Précédent</a>
-                                            {% endif %}
-
-                                            Page {{ currentPage }} sur {{ totalPages }}
-
-                                            {% if currentPage < totalPages %}
-                                                <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({'page': currentPage + 1})) }}">Suivant</a>
-                                            {% endif %}
+                                            <span>Page {{ currentPage }} of {{ totalYearlyPages }}</span>
+                                            <div>
+                                                {% if currentPage > 1 %}
+                                                    <a href="{{ path(app.request.attributes.get('_route'), {page: currentPage - 1}) }}">Previous</a>
+                                                {% endif %}
+                                                {% if currentPage < totalYearlyPages %}
+                                                    <a href="{{ path(app.request.attributes.get('_route'), {page: currentPage + 1}) }}">Next</a>
+                                                {% endif %}
+                                            </div>
                                         </div>
 
                                     </div>

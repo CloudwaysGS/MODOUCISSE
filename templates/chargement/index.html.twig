@@ -36,17 +36,17 @@
                                 <th>{{ c.telephone }}</th>
                                 <th>{{ c.total }}</th>
                                 <th>{{ c.date | date('d/m/Y') }}</th>
-                                <th style="color: {% if c.statut == 'payée' %} green {% elseif c.statut == 'impayé' %} red {% elseif c.statut == 'En cours' %} orange {% endif %}">
+                                <th style="color: {% if c.statut == 'payée' %} green {% elseif c.statut == 'impayé' %} red {% elseif c.statut == 'En cours' %} orange {% elseif c.statut == 'avance' %} rgba(226,103,9,0.88) {% endif %}">
                                     {{ c.statut }}
                                 </th>
 
                                 <th>
-                                    <a class="popup-link btn btn-primary {% if c.statut == 'payée' %} disabled {% endif %}" title="payée" href="#" data-toggle="modal" data-target="#userModal" data-id="{{ c.id }}">
+                                    <a class="popup-link btn btn-primary {% if c.statut == 'payée' %} disabled {% endif %}" title="Options de Paiement" href="#" data-toggle="modal" data-target="#userModal" data-id="{{ c.id }}">
                                         <i class="fa fa-money-bill-alt"></i>
                                     </a>
-                                    <a class="popup-link btn btn-primary" title="facture détaillée" href="javascript:void(0);" onclick="openPopup('{{ path('extraire', {'id': c.id}) }}')"><i class="fa fa-download"></i></a>
-                                    <a class="popup-link btn btn-primary" title="extraire en pdf" href="{{ path('pdf', {'id':c.id}) }}"><i class="fa fa-file-pdf"></i></a>
-                                    <a class="popup-link btn btn-primary" title="user" href="#" data-toggle="modal" data-target="#userModal1" data-user-id="{{ c.id }}">
+                                    <a class="popup-link btn btn-primary" title="Ouverture de Facture Client" href="javascript:void(0);" onclick="openPopup('{{ path('extraire', {'id': c.id}) }}')"><i class="fa fa-download"></i></a>
+                                    <a class="popup-link btn btn-primary" title="Génération de Facture Client en PDF" href="{{ path('pdf', {'id':c.id}) }}"><i class="fa fa-file-pdf"></i></a>
+                                    <a class="popup-link btn btn-primary" title="Facturier" href="#" data-toggle="modal" data-target="#userModal1" data-user-id="{{ c.id }}">
                                         <i class="fa fa-user" aria-hidden="true"></i>
                                     </a>
 
@@ -89,7 +89,7 @@
         <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="userModalLabel">Ajouter un prix</h5>
+                    <h5 class="modal-title" id="userModalLabel">Options de Paiement</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -97,8 +97,8 @@
                 <div class="modal-body text-center">
                     <form id="paymentForm" method="POST" action="{{ path('statut', {'id': 0}) }}">
                         <div class="form-group">
-                            <label for="priceInput">Prix</label>
-                            <input type="number" class="form-control" id="priceInput" name="price" required>
+                            <label for="priceInput">Ajouter un prix</label>
+                            <input type="number" class="form-control" placeholder="Payer la totalité ou un acompte." id="priceInput" name="price" required>
                         </div>
                         <button type="submit" class="btn btn-primary">OK</button>
                     </form>
