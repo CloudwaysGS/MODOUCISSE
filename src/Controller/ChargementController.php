@@ -247,13 +247,13 @@ class ChargementController extends AbstractController
         $pdf->Cell(142.5, -10, 'Total', 0, 0, 'L', true); // true pour la couleur de fond
         $pdf->Cell(47.5, -10, utf8_decode($total . ' F'), 0, 1, 'C',true);
         // Avance sans couleur de fond
-        $pdf->Cell(14.5, 30, 'Avance', 0, 0, 'L', false);
-        $pdf->Cell(30.5, 30, utf8_decode($avance . ' F'), 0, 1, 'C', false);
+        $pdf->Cell(14.5, 30, 'Acompte', 0, 0, 'L', false);
+        $pdf->Cell(30.5, 30, utf8_decode($avance . ' '), 0, 1, 'C', false);
 
 
         // Reste sans couleur de fond
         $pdf->Cell(14.5, -15, 'Reste', 0, 0, 'L', false);
-        $pdf->Cell(30.5, -15, utf8_decode($reste . ' F'), 0, 1, 'C', false);
+        $pdf->Cell(30.5, -15, utf8_decode($reste . ' '), 0, 1, 'C', false);
 
         // Téléchargement du fichier PDF
         $pdf->Output('D', $filename);
@@ -267,63 +267,58 @@ class ChargementController extends AbstractController
 
         $prixAvance = $request->request->get('price');
 
+        $nomClient = $chargement->getNomClient();
+        $client = $entityManager->getRepository(Client::class)->findOneBy(['nom' => $nomClient]);
 
-        if ($prixAvance) {
-            // Vous pouvez utiliser le prix ici, par exemple, le sauvegarder dans votre entité Chargement
-            $reste = $chargement->getTotal() - $prixAvance;
-
-            if ($reste == 0){
-                $chargement->setStatut('payée');
-                $entityManager->persist($chargement);
-                $entityManager->flush();
-                $this->addFlash('success', 'Le règlement de la facture a été effectué.');
-                return $this->redirectToRoute('liste_chargement');
-
-            }elseif ($chargement->getAvance() != null){
-                $this->addFlash('danger', 'Vous avez déjà effectué un acompte auparavant.');
-                return $this->redirectToRoute('liste_chargement');
-            }
-            elseif ($reste > 0 && $reste < $chargement->getTotal()){
-                $dette = new Dette();
-                $date = new \DateTime();
-                $dette->setMontantDette($reste);
-                $dette->setReste($reste);
-                $dette->setDateCreated($date);
-                $dette->setStatut('impayé');
-
-                $chargement->setReste($reste);
-                $chargement->setAvance($prixAvance);
-                $chargement->setStatut('avance');
-
-                $nomClient = $chargement->getNomClient();
-                $client = $entityManager->getRepository(Client::class)->findOneBy(['nom' => $nomClient]);
-
-                if ($client) {
-                    $dette->setClient($client);
-                    $dettes = $entityManager->getRepository(Dette::class)->findAll();
-
-                    foreach ($dettes as $s) {
-                        if ($dette->getClient()->getNom() === $s->getClient()->getNom() && $s->getStatut() == "impayé" && $s->getReste() != 0) {
-                            $entityManager->persist($chargement);
-                            $entityManager->flush();
-                            $this->addFlash('danger', $s->getClient()->getNom() . ' a déjà une dette non payée.');
-                            return $this->redirectToRoute('liste_chargement');
-                        }
-                    }
-                    $entityManager->persist($dette);
-                    $entityManager->flush();
-                }else {
-                    $this->addFlash('danger', 'Client non trouvé.');
-                    return $this->redirectToRoute('liste_chargement');
-                }
-
-            }
-
-            $this->addFlash('success', 'Le paiement de la facture a été effectué.');
-        } else {
+        if (!$prixAvance) {
             $this->addFlash('error', 'Le prix doit être renseigné.');
+            return $this->redirectToRoute('liste_chargement');
         }
 
+        $reste = $chargement->getTotal() - $prixAvance;
+
+        if ($reste == 0){
+            $chargement->setStatut('payée');
+            if ($client) {
+                $dettes = $entityManager->getRepository(Dette::class)->findBy(['client' => $client, 'statut' => 'impayé']);
+                foreach ($dettes as $d) {
+                    $d->setStatut('payée');
+                }
+            }
+
+            $entityManager->persist($chargement);
+            $this->addFlash('success', 'Le règlement de la facture a été effectué.');
+        } elseif ($chargement->getAvance() != null){
+            $this->addFlash('danger', 'Vous avez déjà effectué un acompte auparavant.');
+        } elseif ($reste > 0 && $reste < $chargement->getTotal()) {
+            $dette = new Dette();
+            $date = new \DateTime();
+            $dette->setMontantDette($reste);
+            $dette->setReste($reste);
+            $dette->setDateCreated($date);
+            $dette->setStatut('impayé');
+
+            $chargement->setReste($reste);
+            $chargement->setAvance($prixAvance);
+            $chargement->setStatut('avance');
+
+
+            if ($client) {
+                $dettes = $entityManager->getRepository(Dette::class)->findBy(['client' => $client, 'statut' => 'impayé']);
+
+                if (!empty($dettes)) {
+                    $this->addFlash('danger', $client->getNom() . ' a déjà une dette non payée.');
+                } else {
+                    $dette->setClient($client);
+                    $entityManager->persist($dette);
+                    $this->addFlash('success', 'Le paiement de la facture a été effectué.');
+                }
+            } else {
+                $this->addFlash('danger', 'Client non trouvé.');
+            }
+        }
+
+        $entityManager->flush();
         return $this->redirectToRoute('liste_chargement');
     }
 
