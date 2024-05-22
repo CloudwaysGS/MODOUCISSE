@@ -55,6 +55,9 @@ class Chargement
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0', nullable: true)]
     private ?string $reste = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0', nullable: true)]
+    private ?string $detteImpaye = null;
+
     public function __construct()
     {
         $this->facture = new ArrayCollection();
@@ -257,6 +260,18 @@ class Chargement
     public function setReste(?string $reste): self
     {
         $this->reste = $reste;
+
+        return $this;
+    }
+
+    public function getDetteImpaye(): ?string
+    {
+        return $this->detteImpaye;
+    }
+
+    public function setDetteImpaye(?string $detteImpaye): self
+    {
+        $this->detteImpaye = $detteImpaye;
 
         return $this;
     }

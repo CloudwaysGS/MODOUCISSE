@@ -41,19 +41,36 @@
                                 </th>
 
                                 <th>
-                                    <a class="popup-link btn btn-primary {% if c.statut == 'payée' %} disabled {% endif %}" title="Options de Paiement" href="#" data-toggle="modal" data-target="#userModal" data-id="{{ c.id }}">
-                                        <i class="fa fa-money-bill-alt"></i>
-                                    </a>
-                                    <a class="popup-link btn btn-primary" title="Ouverture de Facture Client" href="javascript:void(0);" onclick="openPopup('{{ path('extraire', {'id': c.id}) }}')"><i class="fa fa-download"></i></a>
-                                    <a class="popup-link btn btn-primary" title="Génération de Facture Client en PDF" href="{{ path('pdf', {'id':c.id}) }}"><i class="fa fa-file-pdf"></i></a>
-                                    <a class="popup-link btn btn-primary" title="Facturier" href="#" data-toggle="modal" data-target="#userModal1" data-user-id="{{ c.id }}">
-                                        <i class="fa fa-user" aria-hidden="true"></i>
-                                    </a>
+                                        <ul class="navbar-nav">
+                                            <li class="nav-item dropdown">
+                                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
+                                                   role="button" data-toggle="dropdown" aria-haspopup="true"
+                                                   aria-expanded="false">
+                                                    ...
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-right animated--grow-in"
+                                                     aria-labelledby="navbarDropdown">
+                                                    <a class="popup-link btn btn-primary btn-circle btn-sm  {% if c.statut == 'payée' %} disabled {% endif %}" title="Options de Paiement" href="#" data-toggle="modal" data-target="#userModal" data-id="{{ c.id }}">
+                                                        <i class="fa fa-money-bill-alt"></i>
+                                                    </a>
+                                                    <a class="popup-link btn btn-primary btn-circle btn-sm " title="Ouverture de Facture Client" href="javascript:void(0);" onclick="openPopup('{{ path('extraire', {'id': c.id}) }}')"><i class="fa fa-download"></i></a>
+                                                    <a class="popup-link btn btn-primary btn-circle btn-sm " title="Génération de Facture Client en PDF" href="{{ path('pdf', {'id':c.id}) }}"><i class="fa fa-file-pdf"></i></a>
+                                                    <a class="popup-link btn btn-primary btn-circle btn-sm " title="Facturier" href="#" data-toggle="modal" data-target="#userModal1" data-user-id="{{ c.id }}">
+                                                        <i class="fa fa-user" aria-hidden="true"></i>
+                                                    </a>
 
-                                    {% if is_granted('ROLE_GESTION_STOCK') %}
-                                    <a class="popup-link btn btn-primary" title="supprimer" href="{{ path('chargement_delete', {'id':c.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette facture ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
-                                    {% endif %}
-                                </th>
+                                                    <a class="popup-link btn btn-primary btn-circle btn-sm" title="Remboursement" href="{{ path('remboursement', {'id':c.id}) }}"><i class="fa fa-angle-double-down"></i></a>
+
+
+                                                    {% if is_granted('ROLE_GESTION_STOCK') %}
+                                                        <a class="popup-link btn btn-primary btn-circle btn-sm" title="supprimer" href="{{ path('chargement_delete', {'id':c.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette facture ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                                    {% endif %}
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </nav>
+
+                                    </th>
                             </tr>
                         {% else %}
                             <tr>
@@ -97,11 +114,14 @@
                 <div class="modal-body text-center">
                     <form id="paymentForm" method="POST" action="{{ path('statut', {'id': 0}) }}">
                         <div class="form-group">
-                            <label for="priceInput">Ajouter un prix</label>
-                            <input type="number" class="form-control" placeholder="Payer la totalité ou un acompte." id="priceInput" name="price" required>
+                            <label for="priceInput">Payer la totalité ou faire un acompte.</label>
+                            <input type="number" class="form-control" placeholder="Ajouter un prix" id="priceInput" name="price" >
                         </div>
-                        <button type="submit" class="btn btn-primary">OK</button>
+                        <button type="submit" class="btn btn-primary">Payer</button>
+
                     </form>
+
+
                 </div>
             </div>
         </div>

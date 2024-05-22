@@ -148,6 +148,7 @@ class FactureController extends AbstractController
             $adresse = null;
             $telephone = null;
             $nom = null;
+            $impayé = null;
 
             if (!empty($factures)) {
                 $firstFacture= end($factures);
@@ -157,12 +158,24 @@ class FactureController extends AbstractController
                     $telephone = $firstFacture->getClient()->getTelephone();
                 }
             }
-            // Save invoices to the Chargement table
+
+        if ($nom) {
+            $dettesImpayees = $entityManager->getRepository(Dette::class)->findBy([
+                'statut' => 'impayé',
+                'client' => $entityManager->getRepository(Client::class)->findOneBy(['nom' => $nom])
+            ]);
+            if (!empty($dettesImpayees)) {
+                $impayé = $dettesImpayees[0]->getReste();
+            }
+        }
+
+        // Save invoices to the Chargement table
             $chargement = new Chargement();
             $chargement->setNomClient($nom);
             $chargement->setAdresse($adresse);
             $chargement->setTelephone($telephone);
             $chargement->setNombre(count($factures));
+            $chargement->setDetteImpaye($impayé);
             if ($chargement->getNombre() == 0) {
                 return $this->redirectToRoute('facture_liste');
             }

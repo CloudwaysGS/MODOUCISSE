@@ -261,6 +261,45 @@ class ChargementController extends AbstractController
 
     }
 
+    #[Route('/chargement/remboursement/{id}', name: 'remboursement')]
+    public function rembourserDettes(Request $request,Chargement $chargement, EntityManagerInterface $entityManager)
+    {
+
+        $nomClient = $chargement->getNomClient();
+        // Trouver le client
+        $client = $entityManager->getRepository(Client::class)->findOneBy(['nom' => $nomClient]); // Remplacez $nomClient par le nom du client concerné
+
+        // Vérifier si le client a des dettes impayées
+        $dettesImpayees = $entityManager->getRepository(Dette::class)->findBy([
+            'client' => $client,
+            'statut' => 'impayé'
+        ]);
+
+        if (!empty($dettesImpayees)) {
+            // Mettre à jour le statut des dettes impayées et le montant restant
+            foreach ($dettesImpayees as $dette) {
+                $dette->getMontantDette();
+                $chargement->getTotal();
+                $chargement->setTotal($dette->getMontantDette() + $chargement->getTotal());
+                $dette->setStatut('payée');
+                $dette->setReste(0); // Mettre le reste à zéro
+                $entityManager->persist($dette);
+            }
+
+            // Enregistrer les modifications dans la base de données
+            $entityManager->flush();
+
+            // Ajouter un message de succès
+            $this->addFlash('success', 'Les dettes impayées ont été remboursées avec succès.');
+        } else {
+            // Ajouter un message d'erreur si aucune dette impayée n'a été trouvée pour ce client
+            $this->addFlash('danger', 'Le client n\'a aucune dette impayée à rembourser.');
+        }
+
+        // Rediriger l'utilisateur vers la page de liste des chargements ou toute autre page appropriée
+        return $this->redirectToRoute('liste_chargement');
+    }
+
 
     #[Route('/chargement/statut/{id}', name: 'statut')]
     public function statut(Request $request, Chargement $chargement, EntityManagerInterface $entityManager){
@@ -283,6 +322,7 @@ class ChargementController extends AbstractController
                 $dettes = $entityManager->getRepository(Dette::class)->findBy(['client' => $client, 'statut' => 'impayé']);
                 foreach ($dettes as $d) {
                     $d->setStatut('payée');
+                    $d->setReste('0');
                 }
             }
 
@@ -308,6 +348,7 @@ class ChargementController extends AbstractController
 
                 if (!empty($dettes)) {
                     $this->addFlash('danger', $client->getNom() . ' a déjà une dette non payée.');
+                    return $this->redirectToRoute('liste_chargement');
                 } else {
                     $dette->setClient($client);
                     $entityManager->persist($dette);
