@@ -28,6 +28,7 @@ class PayoffSupplierType extends AbstractType
                 'label' => false,
                 'attr' => array(
                     'class' => 'form-control form-group',
+
                     'placeholder' => 'montant avance',
                 ),
                 'required' => true,

@@ -10,6 +10,8 @@
         <div id="flash-message" class="alert alert-danger">{{ message }}</div>
     {% endfor %}
     {{ form_start(form2) }}
+    <h3>Paiement des Fournisseurs</h3>
+
     <div class="m-2 form-row align-items-end">
         <div class="col">
             {{ form_row(form2.nom) }}
@@ -21,7 +23,7 @@
         </div>
     </div>
     {{ form_end(form2) }}
-    <a href="{{ path('detteFournisseur_add') }}" class="btn btn-primary m-2">liste dettes</a>
+    <a href="{{ path('detteFournisseur_add') }}" class="btn btn-primary m-2">Dette fournisseurs</a>
     <a href="{{ path('fournisseur_liste') }}" class="btn btn-primary m-2">liste fournisseur</a>
     <div class="row">
         <div class="container col-md-8">
