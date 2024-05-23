@@ -274,16 +274,22 @@ class ChargementController extends AbstractController
             'client' => $client,
             'statut' => 'impayé'
         ]);
-
         if (!empty($dettesImpayees)) {
             // Mettre à jour le statut des dettes impayées et le montant restant
             foreach ($dettesImpayees as $dette) {
-                $dette->getMontantDette();
-                $chargement->getTotal();
-                $chargement->setTotal($dette->getMontantDette() + $chargement->getTotal());
-                $dette->setStatut('payée');
-                $dette->setReste(0); // Mettre le reste à zéro
-                $entityManager->persist($dette);
+
+                if ($dette->getTag() !== '1' && $chargement->getStatut() == 'avance'){
+                    dd("ok");
+                    $nouveauTotal = $chargement->getTotal() + $dette->getMontantDette();
+                    $chargement->setTotal($nouveauTotal);
+                    $dette->setMontantDette($nouveauTotal);
+                    $dette->setReste($nouveauTotal);
+                    $dette->setTag('1');
+                    $entityManager->persist($dette);
+                }else{
+                    $this->addFlash('danger', 'Dette déjà ajouté précédemment.');
+                    return $this->redirectToRoute('liste_chargement');
+                }
             }
 
             // Enregistrer les modifications dans la base de données
@@ -294,6 +300,27 @@ class ChargementController extends AbstractController
         } else {
             // Ajouter un message d'erreur si aucune dette impayée n'a été trouvée pour ce client
             $this->addFlash('danger', 'Le client n\'a aucune dette impayée à rembourser.');
+        }
+
+        // Rediriger l'utilisateur vers la page de liste des chargements ou toute autre page appropriée
+        return $this->redirectToRoute('liste_chargement');
+    }
+
+    #[Route('/chargement/payer/{id}', name: 'payer')]
+    public function payer(Request $request,Chargement $chargement, EntityManagerInterface $entityManager)
+    {
+        if ($chargement->getStatut() !== "payée"){
+            // Mettre à jour le statut des dettes impayées
+            $chargement->setStatut('payée');
+            // Enregistrer les modifications dans la base de données
+            $entityManager->flush();
+
+            // Ajouter un message de succès
+            $this->addFlash('success', 'La facture a été payée avec succès.');
+
+        }else{
+            $this->addFlash('danger', 'Facture déjà payée.');
+
         }
 
         // Rediriger l'utilisateur vers la page de liste des chargements ou toute autre page appropriée

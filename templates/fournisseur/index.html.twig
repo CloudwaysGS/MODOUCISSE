@@ -1,0 +1,78 @@
+{% extends 'accueil.html.twig' %}
+
+{% block title %}Fournisseur{% endblock %}
+
+{% block body %}
+    {% for message in app.session.flashBag.get('success') %}
+        <div id="flash-message" class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.session.flashBag.get('danger') %}
+        <div id="flash-message" class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+    <a href="{{ path('dette_founisseur_liste') }}" class="btn btn-primary ml-3 mb-2">Dettes fournisseurs</a>
+    <a href="{{ path('detteFournisseur_add') }}" class="btn btn-primary ml-3 mb-2">Paiement Fournisseur</a>
+    <div class="row">
+        <div class="container col-md-8">
+
+            <div class="card ">
+                <div class="card-header">Liste des Fournisseurs</div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Nom </th>
+                                <th>Telephone</th>
+                                <th>action</th>
+                            </tr>
+                            {% for c in client %}
+                                <tr>
+                                    <th>{{ c.nom }}</th>
+                                    <th>{{ c.telephone }}</th>
+                                    <th>
+                                        <a title="Modifier" href="{{ path('edit_fournisseur',{'id':c.id}) }}"><i class="fa fa-edit"></i></a>
+                                        <a title="supprimer" href="{{ path('fournisseur_delete', {'id':c.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                    </th>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-center">
+                            {% if total > limit %}
+                                {% set pages = (total / limit)|round(0, 'ceil') %}
+                                {% for i in 1..pages %}
+                                    {% if i == page %}
+                                        <li class="page-item active" aria-current="page">
+                                            <span class="page-link">{{ i }} <span class="sr-only">(current)</span></span>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item"><a class="page-link" href="{{ path('fournisseur_liste', {'page': i}) }}">{{ i }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <div class="container col-md-4">
+            <div class="card">
+                <div class="card-header">Formulaire d'ajout fournisseur </div>
+                <div class="card-body">
+                    {{ form(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+    <script>
+        setTimeout(function() {
+            var flashMessage = document.getElementById('flash-message');
+            if (flashMessage !== null) {
+                flashMessage.remove();
+            }
+        }, 10000);
+    </script>
+{% endblock %}

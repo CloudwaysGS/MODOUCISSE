@@ -1,0 +1,101 @@
+{% extends 'accueil.html.twig' %}
+
+{% block title %}DetteFournisseur{% endblock %}
+
+{% block body %}
+    {% for message in app.session.flashBag.get('success') %}
+        <div id="flash-message" class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.session.flashBag.get('danger') %}
+        <div id="flash-message" class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+
+    <a href="{{ path('payoff_supplier_liste') }}" class="btn btn-primary ml-3 mb-2">Paiement fournisseur</a>
+    <a href="{{ path('dette_founisseur_liste') }}" class="btn btn-primary ml-3 mb-2">dette fournisseur</a>
+
+    <div class="row">
+        <div class="container col-md-8">
+            <div class="card ">
+                <div class="card-header">
+                    <a href="{{ path('dette_liste') }}">Liste des dettes clients</a>
+                    <a class="m-4" href="{{ path('dette_founisseur_liste') }}">Liste des dettes fournisseurs</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Nom</th>
+                                <th>Montant</th>
+                                {% if dette %}
+                                    <th>{{ dette[0].reste < 0 ? 'A Remettre' : 'Reste' }}</th>
+                                {% endif %}
+                                <th>Date</th>
+                                <th>statut</th>
+                                <th>action</th>
+                            </tr>
+                            {% for d in dette %}
+                                <tr>
+                                    <th>{{ d.fournisseur }}</th>
+                                    <th>{{ d.montantDette | number_format(0, ',', ' ') }}</th>
+                                    {% if is_numeric(d.reste) %}
+                                        <th style="color: {{ d.reste < 0 ? 'red' : 'inherit' }}">
+                                            {{ d.reste < 0 ? -d.reste : d.reste | number_format(0, ',', ' ') }}
+                                        </th>
+                                    {% else %}
+                                        <th>{{ d.reste }}</th>
+                                    {% endif %}
+
+
+
+                                    <th>{{ d.date | date('d/m/Y') }}</th>
+                                    <th style="color: {% if d.statut == 'payée' %}#1cc88a{% else %}red{% endif %}">{{ d.statut }}</th>
+                                    <th>
+                                        <a title="Avance" href="{{ path('payoff_supplier_add', {'id':d.id}) }}"><i class='far fa-address-card'></i></a>
+                                        <a title="supprimer" href="{{ path('dette_founisseur_delete', {'id':d.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette dette ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                    </th>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-center">
+                            {% if total > limit %}
+                                {% set pages = (total / limit)|round(0, 'ceil') %}
+                                {% for i in 1..pages %}
+                                    {% if i == page %}
+                                        <li class="page-item active" aria-current="page">
+                                            <span class="page-link">{{ i }} <span class="sr-only">(current)</span></span>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item"><a class="page-link" href="{{ path('dette_liste', {'page': i}) }}">{{ i }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <div class="container col-md-4">
+            <div class="card">
+                <div class="card-header">Formulaire d'ajout des dettes</div>
+                <div class="card-body">
+                    {{ form(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block javascripts %}
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+
+    <script>
+        setTimeout(function() {
+            var flashMessage = document.getElementById('flash-message');
+            if (flashMessage !== null) {
+                flashMessage.remove();
+            }
+        }, 10000);
+    </script>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends 'accueil.html.twig' %}
+
+{% block title %}Paiement{% endblock %}
+
+{% block body %}
+    {% for message in app.session.flashBag.get('success') %}
+        <div id="flash-message" class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.session.flashBag.get('danger') %}
+        <div id="flash-message" class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+    {{ form_start(form2) }}
+    <div class="m-2 form-row align-items-end">
+        <div class="col">
+            {{ form_row(form2.nom) }}
+        </div>
+        <div class="col">
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Recherche</button>
+            </div>
+        </div>
+    </div>
+    {{ form_end(form2) }}
+    <a href="{{ path('detteFournisseur_add') }}" class="btn btn-primary m-2">liste dettes</a>
+    <a href="{{ path('fournisseur_liste') }}" class="btn btn-primary m-2">liste fournisseur</a>
+    <div class="row">
+        <div class="container col-md-8">
+            <div class="card ">
+                <div class="card-header">Liste des fournisseurs</div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Client</th>
+                                <th>Montant avance</th>
+                                <th>Reste</th>
+                                <th>Date</th>
+                                <th>action</th>
+                            </tr>
+                            {% for p in paiements %}
+                                <tr>
+                                    <th>{{ p.fournisseur.nom }}</th>
+                                    <th>{{ p.montant }}</th>
+                                    <th>{{ p.reste }}</th>
+                                    <th>{{ p.datePaiement | date('d/m/Y') }}</th>
+                                    <th>
+                                        <a title="Modifier" href="{{ path('payoff_supplier_edit',{'id':p.id}) }}"><i class="fa fa-edit"></i></a>
+                                        <a title="supprimer" href="{{ path('payoff_supplier_delete', {'id':p.id}) }}"><i style="color: red" class="fa fa-trash" aria-hidden="true" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');"></i></a>
+                                    </th>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-center">
+                            {% if total > limit %}
+                                {% set pages = (total / limit)|round(0, 'ceil') %}
+                                {% for i in 1..pages %}
+                                    {% if i == page %}
+                                        <li class="page-item active" aria-current="page">
+                                            <span class="page-link">{{ i }} <span class="sr-only">(current)</span></span>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item"><a class="page-link" href="{{ path('payoff_supplier_liste', {'page': i}) }}">{{ i }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <div class="container col-md-4">
+            <div class="card">
+                <div class="card-header">Formulaire de gestion des clients</div>
+                <div class="card-body">
+                    {{ form(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+    <script>
+        setTimeout(function() {
+            var flashMessage = document.getElementById('flash-message');
+            if (flashMessage !== null) {
+                flashMessage.remove();
+            }
+        }, 10000);
+    </script>
+
+{% endblock %}

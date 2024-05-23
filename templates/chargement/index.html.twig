@@ -50,7 +50,7 @@
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-right animated--grow-in"
                                                      aria-labelledby="navbarDropdown">
-                                                    <a class="popup-link btn btn-primary btn-circle btn-sm  {% if c.statut == 'payée' %} disabled {% endif %}" title="Options de Paiement" href="#" data-toggle="modal" data-target="#userModal" data-id="{{ c.id }}">
+                                                    <a class="popup-link btn btn-primary btn-circle btn-sm  {% if c.statut == 'payée' %} disabled {% endif %}" title="Avance ou paiement total" href="#" data-toggle="modal" data-target="#userModal" data-id="{{ c.id }}">
                                                         <i class="fa fa-money-bill-alt"></i>
                                                     </a>
                                                     <a class="popup-link btn btn-primary btn-circle btn-sm " title="Ouverture de Facture Client" href="javascript:void(0);" onclick="openPopup('{{ path('extraire', {'id': c.id}) }}')"><i class="fa fa-download"></i></a>
@@ -59,7 +59,8 @@
                                                         <i class="fa fa-user" aria-hidden="true"></i>
                                                     </a>
 
-                                                    <a class="popup-link btn btn-primary btn-circle btn-sm" title="Remboursement" href="{{ path('remboursement', {'id':c.id}) }}"><i class="fa fa-angle-double-down"></i></a>
+                                                    <a class="popup-link btn btn-primary btn-circle btn-sm" title="Ajouter dette" href="{{ path('remboursement', {'id':c.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir ajouter cette dette à la facture ?');"><i class="fa fa-angle-double-down"></i></a>
+                                                    <a class="popup-link btn btn-primary btn-circle btn-sm" title="Payer" href="{{ path('payer', {'id':c.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir changer le statut à payée ?');"><i class="fa fa-money-check-alt"></i></a>
 
 
                                                     {% if is_granted('ROLE_GESTION_STOCK') %}
