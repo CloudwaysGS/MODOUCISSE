@@ -47,13 +47,11 @@
                                         <th>{{ d.reste }}</th>
                                     {% endif %}
 
-
-
                                     <th>{{ d.date | date('d/m/Y') }}</th>
                                     <th style="color: {% if d.statut == 'payée' %}#1cc88a{% else %}red{% endif %}">{{ d.statut }}</th>
                                     <th>
-                                        <a title="Avance" href="{{ path('payoff_supplier_add', {'id':d.id}) }}"><i class='far fa-address-card'></i></a>
-                                        <a title="supprimer" href="{{ path('dette_founisseur_delete', {'id':d.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette dette ?');"><i style="color: red" class="fa fa-trash" aria-hidden="true"></i></a>
+                                        <a class="btn btn-info btn-circle btn-sm" title="info" href="javascript:void(0);" onclick="openPopup('{{ path('dette_fournisseur_info', {'id': d.id}) }}')" ><i class="fas fa-info-circle"></i></a>
+                                        <a class="btn btn-danger btn-circle btn-sm" title="supprimer" href="{{ path('dette_founisseur_delete', {'id':d.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette dette ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
                                     </th>
                                 </tr>
                             {% endfor %}
@@ -88,10 +86,34 @@
         </div>
     </div>
 
+    <div class="modal fade custom-modal" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" >Détails</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- ... dette/detail.html.twig ... -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 {% endblock %}
 {% block javascripts %}
     <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
 
+    <script>
+        $(document).ready(function() {
+            $('.open-modal').click(function() {
+                $('#exampleModal').modal('show');
+            });
+        });
+    </script>
     <script>
         setTimeout(function() {
             var flashMessage = document.getElementById('flash-message');
@@ -99,5 +121,26 @@
                 flashMessage.remove();
             }
         }, 10000);
+    </script>
+
+    <script>
+        function openPopup(url) {
+            // Effectuer une requête AJAX pour récupérer le contenu du formulaire
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    // Injecter le contenu dans le modal Bootstrap
+                    const modalBody = document.getElementById('myModal').querySelector('.modal-body');
+                    modalBody.innerHTML = data;
+
+                    // Afficher le modal
+                    $('#myModal').modal('show');
+
+                    // Initialize your form (if needed, e.g., for date pickers)
+                    // Example: $(document).find('form').initPlugin();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
     </script>
 {% endblock %}

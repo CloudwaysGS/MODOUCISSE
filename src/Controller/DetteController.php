@@ -4,27 +4,19 @@ namespace App\Controller;
 
 use App\Entity\Client;
 use App\Entity\Dette;
-use App\Entity\Paiement;
 use App\Entity\Search;
 use App\Form\DetteType;
 use App\Form\SearchType;
-use App\Form\UpdateType;
 use App\Repository\ClientRepository;
 use App\Repository\DetteRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
 use MercurySeries\FlashyBundle\FlashyNotifier;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Knp\Component\Pager\PaginatorInterface;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Type;
 
 class DetteController extends AbstractController
 {

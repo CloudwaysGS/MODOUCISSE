@@ -12,7 +12,6 @@ use App\Entity\Search;
 use App\Form\SearchType;
 use App\Repository\ChargementRepository;
 use App\Repository\FactureRepository;
-use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -279,7 +278,7 @@ class ChargementController extends AbstractController
             foreach ($dettesImpayees as $dette) {
 
                 if ($dette->getTag() !== '1' && $chargement->getStatut() == 'avance'){
-                    dd("ok");
+
                     $nouveauTotal = $chargement->getTotal() + $dette->getMontantDette();
                     $chargement->setTotal($nouveauTotal);
                     $dette->setMontantDette($nouveauTotal);

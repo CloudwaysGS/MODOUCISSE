@@ -43,9 +43,6 @@ class Client
     #[ORM\OneToMany(mappedBy: 'client', targetEntity: Facture2::class)]
     private Collection $facture2s;
 
-    #[ORM\OneToMany(mappedBy: 'client', targetEntity: Sortie::class)]
-    private Collection $sorties;
-
     #[ORM\OneToMany(mappedBy: 'client', targetEntity: Entree::class)]
     private Collection $entrees;
 
@@ -249,66 +246,6 @@ class Client
             // set the owning side to null (unless already changed)
             if ($facture2->getClient() === $this) {
                 $facture2->setClient(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Sortie>
-     */
-    public function getSorties(): Collection
-    {
-        return $this->sorties;
-    }
-
-    public function addSorty(Sortie $sorty): self
-    {
-        if (!$this->sorties->contains($sorty)) {
-            $this->sorties->add($sorty);
-            $sorty->setClient($this);
-        }
-
-        return $this;
-    }
-
-    public function removeSorty(Sortie $sorty): self
-    {
-        if ($this->sorties->removeElement($sorty)) {
-            // set the owning side to null (unless already changed)
-            if ($sorty->getClient() === $this) {
-                $sorty->setClient(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Entree>
-     */
-    public function getEntrees(): Collection
-    {
-        return $this->entrees;
-    }
-
-    public function addEntree(Entree $entree): self
-    {
-        if (!$this->entrees->contains($entree)) {
-            $this->entrees->add($entree);
-            $entree->setClient($this);
-        }
-
-        return $this;
-    }
-
-    public function removeEntree(Entree $entree): self
-    {
-        if ($this->entrees->removeElement($entree)) {
-            // set the owning side to null (unless already changed)
-            if ($entree->getClient() === $this) {
-                $entree->setClient(null);
             }
         }
 

@@ -9,13 +9,10 @@ use App\Entity\Facture;
 use App\Entity\Produit;
 use App\Entity\Search;
 use App\Repository\ClientRepository;
-use App\Repository\DetteRepository;
-
 use App\Repository\FactureRepository;
 use App\Repository\ProduitRepository;
 use App\Service\FactureService;
 use Doctrine\ORM\EntityManagerInterface;
-use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;

@@ -20,9 +20,6 @@ class DetteFournisseur
     private ?string $montantDette = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $montantAvance = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
     private ?string $statut = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -36,6 +33,9 @@ class DetteFournisseur
 
     #[ORM\OneToMany(mappedBy: 'detteFournisseur', targetEntity: PayoffSupplier::class)]
     private Collection $PlayoffSupplier;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $commentaire = null;
 
     public function __construct()
     {
@@ -103,6 +103,18 @@ class DetteFournisseur
     public function setFournisseur(?Fournisseur $fournisseur): self
     {
         $this->fournisseur = $fournisseur;
+
+        return $this;
+    }
+
+    public function getCommentaire(): ?string
+    {
+        return $this->commentaire;
+    }
+
+    public function setCommentaire(?string $commentaire): self
+    {
+        $this->commentaire = $commentaire;
 
         return $this;
     }

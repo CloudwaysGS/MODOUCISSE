@@ -74,7 +74,6 @@
                     {% if is_granted('ROLE_GESTION_STOCK') %}
                         <a class="collapse-item" href="{{ path('dette_liste') }}">Gestion des dettes</a>
                         <a class="collapse-item" href="{{ path('user_liste') }}">Gestion des utilisateurs</a>
-                        <a class="collapse-item" href="{{ path('app_depot_index') }}">Gestion dépôt</a>
                         <a class="collapse-item" href="{{ path('fournisseur_liste') }}">Gestion Fournisseur</a>
                     {% endif %}
 
@@ -407,10 +406,10 @@
                                             <thead class="thead-dark">
                                             <tr>
                                                 <th>Date</th>
-                                                <th>Somme Vendue (en FCA)</th>
+                                                <th>Somme Vendue </th>
                                                 <th>Nbre de Ventes</th>
-                                                <th>Vente Max (en FCA)</th>
-                                                <th>Vente Min (en FCA)</th>
+                                                <th>Vente Max </th>
+                                                <th>Vente Min</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -480,8 +479,8 @@
                                                 <th>Mois</th>
                                                 <th>Total vendu</th>
                                                 <th>Nombre de ventes</th>
-                                                <th>Vente maximale</th>
-                                                <th>Vente minimale</th>
+                                                <th>Vente max</th>
+                                                <th>Vente min</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -528,8 +527,8 @@
                                                 <th>Années</th>
                                                 <th>Total vendu</th>
                                                 <th>Nombre de ventes</th>
-                                                <th>Vente maximale</th>
-                                                <th>Vente minimale</th>
+                                                <th>Vente max</th>
+                                                <th>Vente min</th>
                                             </tr>
                                             </thead>
                                             <tbody>

@@ -5,25 +5,21 @@ namespace App\Controller;
 use App\Repository\ChargementRepository;
 use App\Repository\EntreeRepository;
 use App\Repository\ProduitRepository;
-use App\Repository\SortieRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use DateTime;
 use DateInterval;
-use Doctrine\ORM\Query\Expr;
 
 
 class AccueilController extends AbstractController
 {
     #[Route('/accueil', name: 'accueil')]
     public function index(ProduitRepository $prod,
-                          SortieRepository $sort,
                           EntreeRepository $entree,
                           ChargementRepository $charge,
-                            Request $request,
+                          Request $request,
     ): Response
     {
 

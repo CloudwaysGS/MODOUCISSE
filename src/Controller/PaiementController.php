@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Chargement;
-use App\Entity\Dette;
 use App\Entity\Paiement;
 use App\Entity\Search;
 use App\Form\PaiementType;

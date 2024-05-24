@@ -73,7 +73,7 @@
     {% for message in app.session.flashBag.get('danger') %}
         <div id="flash-message" class="alert alert-danger">{{ message }}</div>
     {% endfor %}
-
+    <h3>Liste des dettes</h3>
     <button class="glow-on-hover ml-3 m-1">
         <a onclick="window.location.href='{{ path('paiement_add') }}'">Paiement</a>
     </button>

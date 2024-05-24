@@ -25,9 +25,6 @@ class Produit
     #[ORM\OneToMany(mappedBy: 'produit', targetEntity: Entree::class, orphanRemoval: true)]
     private Collection $entrees;
 
-    #[ORM\OneToMany(mappedBy: 'produit', targetEntity: Sortie::class, orphanRemoval: true)]
-    private Collection $sorties;
-
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private $releaseDate;
 
@@ -48,15 +45,6 @@ class Produit
 
     #[ORM\ManyToOne(inversedBy: 'produits')]
     private ?Client $client = null;
-
-    #[ORM\ManyToOne(inversedBy: 'produit')]
-    private ?Depot $depot = null;
-
-    #[ORM\OneToMany(mappedBy: 'produit', targetEntity: EntreeDepot::class)]
-    private Collection $entreeDepots;
-
-    #[ORM\OneToMany(mappedBy: 'produit', targetEntity: SortieDepot::class)]
-    private Collection $sortieDepots;
 
     public function __construct()
     {
@@ -121,36 +109,6 @@ class Produit
             // set the owning side to null (unless already changed)
             if ($entree->getProduit() === $this) {
                 $entree->setProduit(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Sortie>
-     */
-    public function getSorties(): Collection
-    {
-        return $this->sorties;
-    }
-
-    public function addSorty(Sortie $sorty): self
-    {
-        if (!$this->sorties->contains($sorty)) {
-            $this->sorties->add($sorty);
-            $sorty->setProduit($this);
-        }
-
-        return $this;
-    }
-
-    public function removeSorty(Sortie $sorty): self
-    {
-        if ($this->sorties->removeElement($sorty)) {
-            // set the owning side to null (unless already changed)
-            if ($sorty->getProduit() === $this) {
-                $sorty->setProduit(null);
             }
         }
 
@@ -277,78 +235,6 @@ class Produit
     public function setClient(?Client $client): self
     {
         $this->client = $client;
-
-        return $this;
-    }
-
-    public function getDepot(): ?Depot
-    {
-        return $this->depot;
-    }
-
-    public function setDepot(?Depot $depot): self
-    {
-        $this->depot = $depot;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, EntreeDepot>
-     */
-    public function getEntreeDepots(): Collection
-    {
-        return $this->entreeDepots;
-    }
-
-    public function addEntreeDepot(EntreeDepot $entreeDepot): self
-    {
-        if (!$this->entreeDepots->contains($entreeDepot)) {
-            $this->entreeDepots->add($entreeDepot);
-            $entreeDepot->setProduit($this);
-        }
-
-        return $this;
-    }
-
-    public function removeEntreeDepot(EntreeDepot $entreeDepot): self
-    {
-        if ($this->entreeDepots->removeElement($entreeDepot)) {
-            // set the owning side to null (unless already changed)
-            if ($entreeDepot->getProduit() === $this) {
-                $entreeDepot->setProduit(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, SortieDepot>
-     */
-    public function getSortieDepots(): Collection
-    {
-        return $this->sortieDepots;
-    }
-
-    public function addSortieDepot(SortieDepot $sortieDepot): self
-    {
-        if (!$this->sortieDepots->contains($sortieDepot)) {
-            $this->sortieDepots->add($sortieDepot);
-            $sortieDepot->setProduit($this);
-        }
-
-        return $this;
-    }
-
-    public function removeSortieDepot(SortieDepot $sortieDepot): self
-    {
-        if ($this->sortieDepots->removeElement($sortieDepot)) {
-            // set the owning side to null (unless already changed)
-            if ($sortieDepot->getProduit() === $this) {
-                $sortieDepot->setProduit(null);
-            }
-        }
 
         return $this;
     }
