@@ -76,18 +76,11 @@ class DetteFournisseurController extends AbstractController
     #[Route('/dette_fournisseur/info/{id}', name: 'dette_fournisseur_info')]
     public function info(DetteFournisseur $dette, EntityManagerInterface $entityManager, Request $request, $id)
     {
-        $fournisseur = $dette->getFournisseur()->getNom();
-        $montant = $dette->getMontantDette();
-        $reste = $dette->getReste();
-        $statut = $dette->getStatut();
-        $comment = $dette->getCommentaire();
+
+        $infos = $entityManager->getRepository(DetteFournisseur::class)->find($id);
         // Renvoie les informations dans la vue du modal
         return $this->render('dette_fournisseur/detail.html.twig', [
-            'fournisseur' => $fournisseur,
-            'montant' => $montant,
-            'reste' => $reste,
-            'statut' => $statut,
-            'comment' => $comment,
+            'infos' => $infos,
         ]);
     }
 
