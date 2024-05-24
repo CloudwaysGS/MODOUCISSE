@@ -19,32 +19,29 @@
                         <table class="table">
                             <tr>
                                 <th>Nom du fournisseur</th>
-                                <td>{{ infos.fournisseur.nom }}</td>
+                                <td>{{ fournisseur }}</td>
                             </tr>
                             <tr>
                                 <th>Montant dette</th>
-                                <td>{{ infos.montantDette | number_format(0, ',', ' ') }} F</td>
+                                <td>{{ montant | number_format(0, ',', ' ') }} F</td>
                             </tr>
                             <tr>
                                 <th>Reste</th>
-                                <td>{{ infos.reste | number_format(0, ',', ' ') }} F</td>
+                                <td>{{ reste | number_format(0, ',', ' ') }} F</td>
                             </tr>
                             <tr>
                                 <th>Statut</th>
                                 <td>
-                                    <a class="btn btn-primary btn-sm" style="background-color: {% if infos.statut == 'payée' %}primary{% else %}#e74a3b{% endif %}; color: white; border: none; height: 20px;line-height: 10px; ; text-align: center;">
-                                        {{ infos.statut }}
+                                    <a class="btn btn-primary btn-sm" style="background-color: {% if statut == 'payée' %}primary{% else %}#e74a3b{% endif %}; color: white; border: none; height: 20px;line-height: 10px; ; text-align: center;">
+                                        {{ statut }}
                                     </a>
                                 </td>
                             </tr>
                             <tr>
                                 <th>Descriptions</th>
-                                <td>{{ infos.commentaire }}</td>
+                                <td>{{ comment }}</td>
                             </tr>
-                            <tr>
-                                <th>Date</th>
-                                <td>{{ infos.date| date('d/m/Y H:i') }}</td>
-                            </tr>
+
                             <!-- Ajoutez d'autres lignes de la table pour afficher les autres détails de la dette -->
                         </table>
                     </div>
