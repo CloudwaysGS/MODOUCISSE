@@ -48,17 +48,6 @@ class DetteRepository extends ServiceEntityRepository
             ;
     }
 
-    public function findUnpaidDebtsTotal()
-    {
-        return $this->createQueryBuilder('p')
-            ->select('SUM(p.montantDette) as totalAmount')
-            ->where('p.statut = :unpaid')
-            ->setParameter('unpaid', 'impayé')
-            ->getQuery()
-            ->getSingleScalarResult();
-    }
-
-
     public function findByName($nom)
     {
         return $this->createQueryBuilder('p')
