@@ -43,7 +43,7 @@ security:
     - { path: ^/chargement/extraire$, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
     - { path: ^/chargement/pdf$, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
     - { path: ^/dette, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
-    - { path: ^/dette/edit$, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
+    - { path: ^/dette/edit/id, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
     - { path: ^/paiement, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
     - { path: ^/client, roles: [ROLE_GESTION_STOCK,ROLE_VENDEUR] }
     - { path: ^/fournisseur, roles: [ROLE_GESTION_STOCK] }
