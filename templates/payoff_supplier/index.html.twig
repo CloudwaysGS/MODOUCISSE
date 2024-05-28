@@ -45,9 +45,7 @@
                                     <th>{{ p.reste }}</th>
                                     <th>{{ p.datePaiement | date('d/m/Y') }}</th>
                                     <th>
-                                        {#
-                                            <a title="Modifier" href="{{ path('payoff_supplier_edit',{'id':p.id}) }}"><i class="fa fa-edit"></i></a>
-                                        #}
+                                        <a title="Modifier" href="{{ path('payoff_supplier_edit',{'id':p.id}) }}"><i class="fa fa-edit"></i></a>
                                         <a title="supprimer" href="{{ path('payoff_supplier_delete', {'id':p.id}) }}"><i style="color: red" class="fa fa-trash" aria-hidden="true" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');"></i></a>
                                     </th>
                                 </tr>

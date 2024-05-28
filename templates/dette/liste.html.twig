@@ -88,7 +88,7 @@
         <a onclick="window.location.href='{{ path('client_add') }}'">+client</a>
     </button>
     <button class="glow-on-hover total">
-        <a >Total impayé : {{ sommeMontantImpaye }} </a>
+            <a >Somme impayée : {{ sommeMontantImpaye | number_format(0, ',', ' ') }} </a>
     </button>
     <div class="row">
         <div class="container col-md-9">
