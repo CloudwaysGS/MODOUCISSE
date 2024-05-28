@@ -48,6 +48,19 @@ class DetteFournisseurRepository extends ServiceEntityRepository
             ;
     }
 
+    // src/Repository/DetteFournisseurRepository.php
+
+    public function findNonPaidTotal()
+    {
+        return $this->createQueryBuilder('d')
+            ->select('SUM(d.reste) as totalNonPaid')
+            ->where('d.statut = :statut')
+            ->setParameter('statut', 'non-payée')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+
 //    /**
 //     * @return DetteFournisseur[] Returns an array of DetteFournisseur objects
 //     */

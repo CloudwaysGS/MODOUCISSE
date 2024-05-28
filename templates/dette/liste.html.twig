@@ -60,6 +60,10 @@
             border-radius: 10px;
         }
 
+        .glow-on-hover.total {
+            width: 400px; /* Largeur spécifique pour ce bouton */
+        }
+
         @keyframes glowing {
             0% { background-position: 0 0; }
             50% { background-position: 400% 0; }
@@ -74,7 +78,7 @@
         <div id="flash-message" class="alert alert-danger">{{ message }}</div>
     {% endfor %}
     <h3>Liste des dettes</h3>
-    <button class="glow-on-hover ml-3 m-1">
+    <button class="glow-on-hover ">
         <a onclick="window.location.href='{{ path('paiement_add') }}'">Paiement</a>
     </button>
     <button class="glow-on-hover">
@@ -83,8 +87,8 @@
     <button class="glow-on-hover">
         <a onclick="window.location.href='{{ path('client_add') }}'">+client</a>
     </button>
-    <button class="glow-on-hover">
-        <a > {{ sommeMontantImpaye | number_format(0, ',', ' ') }} </a>
+    <button class="glow-on-hover total">
+        <a >Total impayé : {{ sommeMontantImpaye }} </a>
     </button>
     <div class="row">
         <div class="container col-md-9">

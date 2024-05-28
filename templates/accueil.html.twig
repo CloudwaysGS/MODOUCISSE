@@ -74,7 +74,8 @@
                     {% if is_granted('ROLE_GESTION_STOCK') %}
                         <a class="collapse-item" href="{{ path('dette_liste') }}">Gestion des dettes</a>
                         <a class="collapse-item" href="{{ path('user_liste') }}">Gestion des utilisateurs</a>
-                        <a class="collapse-item" href="{{ path('fournisseur_liste') }}">Gestion Fournisseur</a>
+                        <a class="collapse-item" href="{{ path('dette_founisseur_liste') }}">Dette Fournisseur</a>
+                        <a class="collapse-item" href="{{ path('payoff_supplier_liste') }}">Paiement Fournisseur</a>
                     {% endif %}
 
                 </div>
@@ -328,7 +329,7 @@
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                                 CAISSE </div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ sumTotal24H }}</div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
@@ -407,9 +408,7 @@
                                             <tr>
                                                 <th>Date</th>
                                                 <th>Somme Vendue </th>
-                                                <th>Nbre de Ventes</th>
-                                                <th>Vente Max </th>
-                                                <th>Vente Min</th>
+
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -417,9 +416,7 @@
                                                 <tr>
                                                     <td>{{ total.date }}</td>
                                                     <td>{{ total.totalSold|number_format(2, ',', ' ') }}</td>
-                                                    <td>{{ total.salesCount }}</td>
-                                                    <td>{{ total.maxSale|number_format(2, ',', ' ') }}</td>
-                                                    <td>{{ total.minSale|number_format(2, ',', ' ') }}</td>
+
                                                 </tr>
                                             {% endfor %}
                                             </tbody>
