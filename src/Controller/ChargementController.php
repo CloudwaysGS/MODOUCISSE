@@ -277,7 +277,7 @@ class ChargementController extends AbstractController
             // Mettre à jour le statut des dettes impayées et le montant restant
             foreach ($dettesImpayees as $dette) {
 
-                if ($dette->getTag() !== '1' && $chargement->getStatut() == 'avance'){
+                if ($dette->getTag() !== '1'){
 
                     $nouveauTotal = $chargement->getTotal() + $dette->getMontantDette();
                     $chargement->setTotal($nouveauTotal);

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Client;
 use App\Entity\Dette;
+use App\Entity\Paiement;
 use App\Entity\Search;
 use App\Form\DetteType;
 use App\Form\SearchType;
@@ -149,44 +150,15 @@ class DetteController extends AbstractController
     }
 
 
-    /*#[Route('/dette/edit/{id}', name: 'edit_dette')]
+    #[Route('/dette/test/{id}', name: 'test')]
     public function edit($id, DetteRepository $detteRepository, Request $request, EntityManagerInterface $entityManager, PaginatorInterface $paginator)
     {
+        dd("ok");
         $dette = $detteRepository->find($id);
+        $dette->getClient()->getNom();
+        $pay = new Paiement();
 
-        // Vérifier si la dette existe
-        if (!$dette) {
-            $this->addFlash('danger', 'Dette non trouvée');
-            return $this->redirectToRoute("dette_liste");
-        }
-
-        $form = $this->createForm(DetteType::class, $dette);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $reste = $form->getData()->getMontantDette();
-            // Affecter la valeur à l'entité Dette
-            $dette->setReste($reste);
-            $entityManager->flush();
-            $this->addFlash('success', 'La dette a été modifié avec succès');
-
-            return $this->redirectToRoute("dette_liste");
-        }
-
-        $queryBuilder = $detteRepository->createQueryBuilder('d');
-
-        // Paginer les résultats de recherche
-        $pagination = $paginator->paginate(
-            $queryBuilder->getQuery(),
-            $request->query->getInt('page', 1), // Utiliser getInt pour obtenir un entier
-            10
-        );
-        return $this->render('dette/liste.html.twig', [
-            'pagination' => $pagination,
-            'form' => $form->createView(),
-            //'form2' => $form2->createView(),
-        ]);
-    }*/
+    }
 
     #[Route('/recherche', name: 'recherche_dette')]
     public function rechercheDette(Request $request, DetteRepository $detteRepository, PaginatorInterface $paginator): JsonResponse
