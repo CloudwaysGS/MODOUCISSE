@@ -14,6 +14,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Type;
 
@@ -32,20 +33,24 @@ class DetteType extends AbstractType
                         ->orderBy('c.nom', 'ASC'); // Tri par ordre alphabétique sur la colonne 'nom'
                 },
             ))
-            ->add('montant_dette', TextType::class, array(
+            ->add('montant_dette', TextType::class, [
                 'label' => false,
                 'attr' => [
                     'class' => 'form-control form-group',
                     'placeholder' => 'Montant de la dette',
-                    ],
+                ],
                 'constraints' => [
                     new NotBlank(['message' => 'Le montant de la dette ne peut pas être vide.']),
                     new Type([
                         'type' => 'numeric',
                         'message' => 'Le montant de la dette doit être un nombre.'
-                    ])
-                ]
-            ))
+                    ]),
+                    new GreaterThanOrEqual([
+                        'value' => 0,
+                        'message' => 'Le montant de la dette ne peut pas être inférieur à 0.'
+                    ]),
+                ],
+            ])
             ->add('commentaire')
 
             ->add('Valider', SubmitType::class, array(

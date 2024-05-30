@@ -77,6 +77,7 @@
     {% for message in app.session.flashBag.get('danger') %}
         <div id="flash-message" class="alert alert-danger">{{ message }}</div>
     {% endfor %}
+
     <h3>Liste des dettes</h3>
     <button class="glow-on-hover ">
         <a onclick="window.location.href='{{ path('paiement_add') }}'">Paiement</a>
@@ -88,7 +89,7 @@
         <a onclick="window.location.href='{{ path('client_add') }}'">+client</a>
     </button>
     <button class="glow-on-hover total">
-            <a >Somme impayée : {{ sommeMontantImpaye | number_format(0, ',', ' ') }} </a>
+            <a >Somme impayée : {{ sommeMontantImpaye | number_format(0, ',', ' ') }} F</a>
     </button>
     <div class="row">
         <div class="container col-md-9">
@@ -130,9 +131,6 @@
                                         <a class="btn btn-primary btn-circle btn-sm" title="paiement" href="{{ path('paiement_add') }}" ><i class="fas fa-money-bill-alt"></i></a>
                                         #}
                                         <a class="btn btn-info btn-circle btn-sm" title="info" href="javascript:void(0);" onclick="openPopup('{{ path('dette_info', {'id': d.id}) }}')" ><i class="fas fa-info-circle"></i></a>
-                                        <a class="btn btn-warning btn-circle btn-sm" title="test" href="{{ path('test', {'id': d.id}) }}">
-                                            <i class="fa fa-acquisitions-incorporated" aria-hidden="true"></i>
-                                        </a>
                                         <a class="btn btn-warning btn-circle btn-sm" title="modifier" href="{{ path('edit_dette', {'id':d.id}) }}"><i class="fa fa-edit" aria-hidden="true"></i> </a>
                                         <a class="btn btn-danger btn-circle btn-sm" title="supprimer" href="{{ path('dette_delete', {'id':d.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette dette ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
 
@@ -147,6 +145,9 @@
             </div>
         </div>
         <div class="container col-md-3">
+            {% for message in app.session.flashBag.get('warning') %}
+                <div id="flash-message" class="alert alert-warning">{{ message }}</div>
+            {% endfor %}
             <div class="card">
                 <div class="card-header">Formulaire de gestion des dettes</div>
                 <div class="card-body">
@@ -173,25 +174,6 @@
         </div>
     </div>
 
-    <div class="modal fade custom-modal" id="customModal" tabindex="-1" role="dialog" aria-labelledby="customModalLabel" aria-hidden="true">
-        <div class="modal-dialog custom-modal-dialog" role="document">
-            <div class="modal-content custom-modal-content">
-                <div class="modal-header custom-modal-header">
-                    <h5 class="modal-title custom-modal-title" id="customModalLabel">Paiement</h5>
-                    <button type="button" class="close custom-close-button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body custom-modal-body">
-                    <!-- Contenu sera chargé ici -->
-                    hjdjddnd
-                </div>
-                <div class="modal-footer custom-modal-footer">
-                    <button type="button" class="btn btn-secondary custom-close-footer-button" data-dismiss="modal">Fermer</button>
-                </div>
-            </div>
-        </div>
-    </div>
 {% endblock %}
 {% block javascripts %}
     <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
@@ -230,26 +212,6 @@
                 .catch(error => console.error('Error:', error));
         }
 
-    </script>
-
-    <script>
-        $(document).ready(function() {
-            $('.btn-warning').click(function(e) {
-                e.preventDefault();
-                var url = $(this).attr('href');
-
-                // Ouvrir le modal immédiatement
-                $('#customModal').modal('show');
-
-                // Effacer le contenu précédent du modal et afficher un message de chargement
-                $('#customModal .custom-modal-body').html('<p>Chargement...</p>');
-
-                // Charger le contenu via AJAX
-                $.get(url, function(data) {
-                    $('#customModal .custom-modal-body').html(data);
-                });
-            });
-        });
     </script>
 
     <script>

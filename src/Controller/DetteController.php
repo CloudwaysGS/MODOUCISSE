@@ -107,58 +107,87 @@ class DetteController extends AbstractController
 
 
     #[Route('/dette/edit/{id}', name: 'edit_dette')]
-    public function editManual($id, DetteRepository $detteRepository, Request $request, EntityManagerInterface $entityManager, SessionInterface $session)
+    public function edit($id,DetteRepository $detteRepository,Request $request,EntityManagerInterface $entityManager, PaginatorInterface $paginator): Response
     {
-        // Vérifier si la dette existe
-        $dette = $detteRepository->find($id);
+
+        $dette =$detteRepository->find($id);
         if (!$dette) {
-            $session->getFlashBag()->add('danger', 'Dette non trouvée');
-            return $this->redirectToRoute('dette_liste');
+            throw $this->createNotFoundException('La dette n\'existe pas.');
         }
 
-        // Traiter les données soumises
-        if ($request->isMethod('POST')) {
-            $montantDette = $request->request->get('montant_dette');
-            $commentaire = $request->request->get('commentaire');
+        $form = $this->createForm(DetteType::class, $dette);
+        $form->handleRequest($request);
+        $search = new Search();
+        $form2 = $this->createForm(SearchType::class, $search);
+        $pagination = $paginator->paginate(
+            $detteRepository->findAllOrderedByDate(),
+            $request->query->get('page', 1),
+            10
+        );
+        if($form->isSubmitted() && $form->isValid()){
 
-            // Vérifier les données soumises
-            if ($montantDette === null || $montantDette < 0) {
-                $session->getFlashBag()->add('danger', 'Le montant de la dette doit être supérieur à zéro');
-                return $this->redirectToRoute('dette_liste');
-            }
+            $dette->setReste($dette->getMontantDette());
+            $entityManager->persist($dette);
+            $entityManager->flush();
+            $this->addFlash('success', 'Dette modifié avec succès');
 
-            // Mettre à jour la dette
-            try {
-                $dette->setMontantDette((float)$montantDette);
-                $dette->setReste((float)$montantDette);
-                $dette->setCommentaire($commentaire);
-
-                $entityManager->flush();
-
-                $session->getFlashBag()->add('success', 'La dette a été modifiée avec succès');
-            } catch (\Exception $e) {
-                $session->getFlashBag()->add('danger', 'Une erreur est survenue lors de la modification de la dette');
-            }
-
-            return $this->redirectToRoute('dette_liste');
+            return $this->redirectToRoute("dette_liste");
         }
 
-        // Afficher le formulaire de modification
-        return $this->render('dette/edit.html.twig', [
-            'dette' => $dette,
+        $sommeMontantImpaye = $detteRepository->findSumMontantImpaye();
+        $this->addFlash('warning', 'MODIFICATION');
+
+        return $this->render('dette/liste.html.twig', [
+            'pagination'=>$pagination,
+            'sommeMontantImpaye' => $sommeMontantImpaye,
+            'form' => $form->createView(),
+            'form2' => $form2->createView(),
         ]);
     }
 
+    /*#[Route('/dette/edit/{id}', name: 'edit_dette')]
+     public function editManual($id, DetteRepository $detteRepository, Request $request, EntityManagerInterface $entityManager, SessionInterface $session)
+     {
+         // Vérifier si la dette existe
+         $dette = $detteRepository->find($id);
+         if (!$dette) {
+             $session->getFlashBag()->add('danger', 'Dette non trouvée');
+             return $this->redirectToRoute('dette_liste');
+         }
 
-    #[Route('/dette/test/{id}', name: 'test')]
-    public function edit($id, DetteRepository $detteRepository, Request $request, EntityManagerInterface $entityManager, PaginatorInterface $paginator)
-    {
-        dd("ok");
-        $dette = $detteRepository->find($id);
-        $dette->getClient()->getNom();
-        $pay = new Paiement();
+         // Traiter les données soumises
+         if ($request->isMethod('POST')) {
+             $montantDette = $request->request->get('montant_dette');
+             $commentaire = $request->request->get('commentaire');
 
-    }
+             // Vérifier les données soumises
+             if ($montantDette === null || $montantDette < 0) {
+                 $session->getFlashBag()->add('danger', 'Le montant de la dette doit être supérieur à zéro');
+                 return $this->redirectToRoute('dette_liste');
+             }
+
+             // Mettre à jour la dette
+             try {
+                 $dette->setMontantDette((float)$montantDette);
+                 $dette->setReste((float)$montantDette);
+                 $dette->setCommentaire($commentaire);
+
+                 $entityManager->flush();
+
+                 $session->getFlashBag()->add('success', 'La dette a été modifiée avec succès');
+             } catch (\Exception $e) {
+                 $session->getFlashBag()->add('danger', 'Une erreur est survenue lors de la modification de la dette');
+             }
+
+             return $this->redirectToRoute('dette_liste');
+         }
+
+         // Afficher le formulaire de modification
+         return $this->render('dette/edit.html.twig', [
+             'dette' => $dette,
+         ]);
+     }
+    */
 
     #[Route('/recherche', name: 'recherche_dette')]
     public function rechercheDette(Request $request, DetteRepository $detteRepository, PaginatorInterface $paginator): JsonResponse
