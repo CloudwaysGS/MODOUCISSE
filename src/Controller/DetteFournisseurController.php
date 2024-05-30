@@ -4,9 +4,12 @@ namespace App\Controller;
 
 use App\Entity\DetteFournisseur;
 use App\Entity\Fournisseur;
+use App\Entity\Search;
 use App\Form\DetteFournisseurType;
+use App\Form\SearchType;
 use App\Repository\DetteFournisseurRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use MercurySeries\FlashyBundle\FlashyNotifier;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,32 +20,32 @@ use Symfony\Component\Security\Core\Security;
 class DetteFournisseurController extends AbstractController
 {
     #[Route('/dette/founisseur', name: 'dette_founisseur_liste')]
-    public function index(DetteFournisseurRepository $detteFournisseurRepository, Request $request): Response
+    public function index(DetteFournisseurRepository $detteFournisseurRepository, Request $request, PaginatorInterface $paginator): Response
     {
         $d = new DetteFournisseur();
         $form = $this->createForm(DetteFournisseurType::class, $d, array(
             'action' => $this->generateUrl('detteFournisseur_add'),
         ));
-        $page = $request->query->getInt('page', 1); // current page number
-        $limit = 10; // number of products to display per page
-        $allDette = $detteFournisseurRepository->findAllOrderedByDate();
-        $total = count($allDette);
-        $offset = ($page - 1) * $limit;
-        $dette = array_slice($allDette, $offset, $limit);
+        $search = new Search();
+        $form2 = $this->createForm(SearchType::class, $search);
+        $form2->handleRequest($request);
+        $nom = $search->getNom();
+        $pagination = $paginator->paginate(
+            ($nom !== null && $nom !== '') ? $detteFournisseurRepository->findByName($nom) : $detteFournisseurRepository->findAllOrderedByDate(),
+            $request->query->get('page', 1),
+            10
+        );
 
         // Calcul de la somme des dettes non-payées
         $totalNonPaid = $detteFournisseurRepository->findNonPaidTotal();
 
         return $this->render('dette_fournisseur/liste.html.twig', [
             'controller_name' => 'DetteController',
-            'dette'=>$dette,
-            'total' => $total,
-            'page' => $page,
-            'limit' => $limit,
             'totalNonPaid' => $totalNonPaid,
-            'form' => $form->createView()
+            'pagination' => $pagination,
+            'form' => $form->createView(),
+            'form2' => $form2->createView(),
         ]);
-        return $this->render('dette_founisseur/liste.html.twig');
     }
 
     #[Route('/detteFournisseur/add', name: 'detteFournisseur_add')]
@@ -94,6 +97,46 @@ class DetteFournisseurController extends AbstractController
         // Renvoie les informations dans la vue du modal
         return $this->render('dette_fournisseur/detail.html.twig', [
             'infos' => $infos,
+        ]);
+    }
+
+    #[Route('/fournisseur/edit/{id}', name: 'edit_dettefournisseur')]
+    public function edit($id,DetteFournisseurRepository $detteRepository,Request $request,EntityManagerInterface $entityManager, PaginatorInterface $paginator): Response
+    {
+
+        $dette =$detteRepository->find($id);
+        if (!$dette) {
+            throw $this->createNotFoundException('La dette n\'existe pas.');
+        }
+
+        $form = $this->createForm(DetteFournisseurType::class, $dette);
+        $form->handleRequest($request);
+        $search = new Search();
+        $form2 = $this->createForm(SearchType::class, $search);
+        $pagination = $paginator->paginate(
+            $detteRepository->findAllOrderedByDate(),
+            $request->query->get('page', 1),
+            10
+        );
+        if($form->isSubmitted() && $form->isValid()){
+
+            $dette->setReste($dette->getMontantDette());
+            $entityManager->persist($dette);
+            $entityManager->flush();
+            $this->addFlash('success', 'Dette modifié avec succès');
+
+            return $this->redirectToRoute("dette_founisseur_liste");
+        }
+
+        $sommeMontantImpaye = $detteRepository->findNonPaidTotal();
+
+        $this->addFlash('warning', 'MODIFICATION');
+
+        return $this->render('dette_fournisseur/liste.html.twig', [
+            'pagination'=>$pagination,
+            'totalNonPaid' => $sommeMontantImpaye,
+            'form' => $form->createView(),
+            'form2' => $form2->createView(),
         ]);
     }
 
