@@ -184,8 +184,12 @@ class ChargementController extends AbstractController
             'Prix unitaire',
             'Montant',
         );
-        $filename = $client !== null ? $client->getNom() : '';
-        $filename .= date("Y-m-d_H-i", time()) . ".pdf";
+        $directory = 'C:\\Users\\absri\\Téléchargements';
+        if (!file_exists($directory)) {
+            mkdir($directory, 0777, true);
+        }
+        $filename = ($client !== null ? $client->getNom() : '') . date("Y-m-d_H-i", time()) . ".pdf";
+        $pdfFilePath = $directory . '\\' . $filename;
 
         // Initialisation du PDF
         $pdf = new \FPDF();
@@ -245,17 +249,31 @@ class ChargementController extends AbstractController
         $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
         $pdf->Cell(142.5, -10, 'Total', 0, 0, 'L', true); // true pour la couleur de fond
         $pdf->Cell(47.5, -10, utf8_decode($total . ' F'), 0, 1, 'C',true);
-        // Avance sans couleur de fond
-        $pdf->Cell(14.5, 30, 'Acompte', 0, 0, 'L', false);
-        $pdf->Cell(30.5, 30, utf8_decode($avance . ' '), 0, 1, 'C', false);
 
+        // Affichage de l'avance si elle n'est pas nulle
+        if ($avance !== null) {
+            $pdf->Cell(14.5, 30, 'Acompte', 0, 0, 'L', false);
+            $pdf->Cell(30.5, 30, utf8_decode($avance . ' '), 0, 1, 'C', false);
+        }
 
-        // Reste sans couleur de fond
-        $pdf->Cell(14.5, -15, 'Reste', 0, 0, 'L', false);
-        $pdf->Cell(30.5, -15, utf8_decode($reste . ' '), 0, 1, 'C', false);
-
+        // Affichage du reste si il n'est pas nul
+        if ($reste !== null) {
+            $pdf->Cell(14.5, -15, 'Reste', 0, 0, 'L', false);
+            $pdf->Cell(30.5, -15, utf8_decode($reste . ' '), 0, 1, 'C', false);
+        }
         // Téléchargement du fichier PDF
+        $pdf->Output('F', $pdfFilePath);
+
+        // Appeler le script PowerShell pour imprimer le PDF
+        $powershellScript = 'C:\\Scripts\\print_pdf.ps1';
+        $command = "powershell.exe -ExecutionPolicy Bypass -File \"$powershellScript\" -pdfFilePath \"$pdfFilePath\"";
+
+        // Exécuter la commande PowerShell
+        shell_exec($command);
+
+        // Forcer le téléchargement du fichier PDF
         $pdf->Output('D', $filename);
+
         exit;
 
     }

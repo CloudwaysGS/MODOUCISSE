@@ -13,7 +13,6 @@ use App\Repository\Facture2Repository;
 use App\Repository\ProduitRepository;
 use App\Service\Facture2Service;
 use Doctrine\ORM\EntityManagerInterface;
-use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -30,18 +29,14 @@ class Facture2Controller extends AbstractController
         Facture2Repository $fac,
         ProduitRepository $prod,
         ClientRepository $clientRepository,
-        PaginatorInterface $paginator,
     ): Response
     {
 
         // Récupération de toutes les factures
         $factures = $fac->findAllOrderedByDate();
 
-        $search = new Search();
-        $nom = $search->getNom();
-
-        $produits = $nom ? $prod->findByName($nom) : $prod->findAllOrderedByDate();
-        $clients = $clientRepository->findAll();
+        $produits = $prod->findAllOrderedByDate();
+        $clients = $clientRepository->findAllOrderedByDate();
 
         return $this->render('facture2/index.html.twig', [
             'produits' => $produits,
@@ -61,14 +56,16 @@ class Facture2Controller extends AbstractController
     #[Route('/facture2/add/{id}', name: 'facture2_add')]
     public function add($id, EntityManagerInterface $entityManager, Request $request, Security $security): RedirectResponse
     {
+
         $user = $security->getUser();
         if (!$user) {
-            $this->addFlash('warning', 'Vous devez être connecté pour ajouter une facture.');
+            $this->addFlash('danger', 'Vous devez être connecté pour ajouter une facture.');
             return $this->redirectToRoute('login'); // Adjust the route to your login page
         }
 
         $quantity = $request->query->get('quantity', 1);
         $clientId = $request->query->get('clientId');
+        $user = $this->getUser();
 
         try {
             $facture = $this->factureService->createFacture2($id, $quantity, $clientId, $user);

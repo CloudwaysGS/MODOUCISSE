@@ -48,7 +48,16 @@ class DetteFournisseurRepository extends ServiceEntityRepository
             ;
     }
 
-    // src/Repository/DetteFournisseurRepository.php
+    public function findByName($nom)
+    {
+        return $this->createQueryBuilder('p')
+            ->join('p.fournisseur', 'f')
+            ->andWhere('f.nom LIKE :nom')
+            ->setParameter('nom', '%'.$nom.'%')
+            ->orderBy('p.date', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 
     public function findNonPaidTotal()
     {

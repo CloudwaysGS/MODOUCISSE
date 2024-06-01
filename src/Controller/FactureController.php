@@ -36,10 +36,7 @@ class FactureController extends AbstractController
         // Récupération de toutes les factures
         $factures = $fac->findAllOrderedByDate();
 
-        $search = new Search();
-        $nom = $search->getNom();
-
-        $produits = $nom ? $prod->findByName($nom) : $prod->findAllOrderedByDate();
+        $produits = $prod->findAllOrderedByDate();
         $clients = $clientRepository->findAllOrderedByDate();
 
         return $this->render('facture/index.html.twig', [
@@ -211,6 +208,12 @@ class FactureController extends AbstractController
     #[Route('/facture/rajout/{id}', name: 'rajout_facture')]
     public function add($id, EntityManagerInterface $entityManager, Request $request, Security $security): RedirectResponse
     {
+
+        $user = $security->getUser();
+        if (!$user) {
+            $this->addFlash('danger', 'Vous devez être connecté pour ajouter une facture.');
+            return $this->redirectToRoute('login'); // Adjust the route to your login page
+        }
 
         $actionType = $request->query->get('actionType', 'addToFacture');
         $quantity = $request->query->get('quantity', 1);
