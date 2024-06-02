@@ -311,25 +311,40 @@ class ChargementController extends AbstractController
     }
 
     #[Route('/chargement/payer/{id}', name: 'payer')]
-    public function payer(Request $request,Chargement $chargement, EntityManagerInterface $entityManager)
+    public function payer(Request $request, Chargement $chargement, EntityManagerInterface $entityManager)
     {
-        if ($chargement->getStatut() !== "payée"){
-            // Mettre à jour le statut des dettes impayées
+        if ($chargement->getStatut() !== "payée") {
+            // Mettre à jour le statut de la facture à "payée"
             $chargement->setStatut('payée');
+
+            // Rechercher le client associé à la facture
+            $nomClient = $chargement->getNomClient();
+            $client = $entityManager->getRepository(Client::class)->findOneBy(['nom' => $nomClient]);
+
+            if ($client) {
+                // Rechercher les dettes impayées du client
+                $dettes = $entityManager->getRepository(Dette::class)->findBy(['client' => $client, 'statut' => 'impayé']);
+
+                if (!empty($dettes)) {
+                    // Mettre à jour la première dette trouvée à "payée" et définir le reste à 0
+                    $dette = $dettes[0];
+                    $dette->setStatut('payée');
+                    $dette->setReste('0');
+                    $entityManager->persist($dette);
+                }
+            }
+
             // Enregistrer les modifications dans la base de données
             $entityManager->flush();
 
-            // Ajouter un message de succès
             $this->addFlash('success', 'La facture a été payée avec succès.');
-
-        }else{
+        } else {
             $this->addFlash('danger', 'Facture déjà payée.');
-
         }
 
-        // Rediriger l'utilisateur vers la page de liste des chargements ou toute autre page appropriée
         return $this->redirectToRoute('liste_chargement');
     }
+
 
 
     #[Route('/chargement/statut/{id}', name: 'statut')]
