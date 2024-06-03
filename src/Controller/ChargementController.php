@@ -282,16 +282,17 @@ class ChargementController extends AbstractController
             // Mettre à jour le statut des dettes impayées et le montant restant
             foreach ($dettesImpayees as $dette) {
 
-                if ($dette->getTag() !== '1'){
+                if ($dette->getTag() !== '1' && $chargement->getStatut() !== 'payée'){
 
                     $nouveauTotal = $chargement->getTotal() + $dette->getMontantDette();
                     $chargement->setTotal($nouveauTotal);
+                    $chargement->setStatut('ajoutée');
                     $dette->setMontantDette($nouveauTotal);
                     $dette->setReste($nouveauTotal);
                     $dette->setTag('1');
                     $entityManager->persist($dette);
                 }else{
-                    $this->addFlash('danger', 'Dette déjà ajouté précédemment.');
+                    $this->addFlash('danger', 'Dette déjà ajouté au total précédemment.');
                     return $this->redirectToRoute('liste_chargement');
                 }
             }
@@ -393,7 +394,7 @@ class ChargementController extends AbstractController
                 $dettes = $entityManager->getRepository(Dette::class)->findBy(['client' => $client, 'statut' => 'impayé']);
 
                 if (!empty($dettes)) {
-                    $this->addFlash('danger', $client->getNom() . ' a déjà une dette non payée.');
+                    $this->addFlash('danger', $client->getNom() . ' a déjà une dette impayée.');
                     return $this->redirectToRoute('liste_chargement');
                 } else {
                     $dette->setClient($client);
@@ -410,15 +411,67 @@ class ChargementController extends AbstractController
     }
 
     #[Route('/chargement/retour/{id}', name: 'retour')]
-    public function retour(Chargement $chargement)
+    public function retour(Chargement $chargement, EntityManagerInterface $entityManager)
     {
-        $facture = new Facture();
-        $factures = $chargement->addFacture($facture);
-        foreach ($factures->getFacture() as $facture) {
-            $f = $facture->getChargement()->getFacture()->toArray();
-            array_pop($f);
-            return $this->render('chargement/extraire.html.twig', ['f' => $f]);
+
+        $verifierFacture1 = $entityManager->getRepository(Facture::class)->findBy(['etat' => 1]);
+        $verifierFacture2 = $entityManager->getRepository(Facture2::class)->findBy(['etat' => 1]);
+        if (empty($verifierFacture1)){
+
+            $nomProduit = $chargement->getFacture()->toArray();
+
+            foreach ($nomProduit as $fac){
+                $facture = new Facture();
+
+                $nomProd = $fac->getNomProduit();
+                $qte = $fac->getQuantite();
+                $montant = $fac->getMontant();
+                $prixUnit = $fac->getPrixUnit();
+                $connect = $fac->getConnect();
+                $client = $fac->getClient();
+                $nomClient = $fac->getNomClient();
+
+                $facture->setNomProduit($nomProd);
+                $facture->setQuantite($qte);
+                $facture->setPrixUnit($prixUnit);
+                $facture->setMontant($montant);
+                $facture->setConnect($connect);
+                $facture->setClient($client);
+                $facture->setNomClient($nomClient);
+                $entityManager->persist($facture);
+
+
+            }
+
+        }elseif (empty($verifierFacture2)){
+            $nomProduit = $chargement->getFacture()->toArray();
+
+            foreach ($nomProduit as $fac){
+                $facture = new Facture2();
+
+                $nomProd = $fac->getNomProduit();
+                $qte = $fac->getQuantite();
+                $montant = $fac->getMontant();
+                $prixUnit = $fac->getPrixUnit();
+                $connect = $fac->getConnect();
+
+                $facture->setNomProduit($nomProd);
+                $facture->setQuantite($qte);
+                $facture->setPrixUnit($prixUnit);
+                $facture->setMontant($montant);
+                $facture->setConnect($connect);
+
+                $entityManager->persist($facture);
+
+
+            }
+        }else{
+            $this->addFlash('danger','Facture1 et Facture2 sont occupées.');
+            return $this->redirectToRoute('liste_chargement');
         }
+
+        $entityManager->flush();
+        return $this->redirectToRoute('facture_liste');
     }
 
     #[Route('/chargement/retour_produit/{id}', name: 'retour_produit')]

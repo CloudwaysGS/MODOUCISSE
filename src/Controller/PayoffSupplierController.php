@@ -57,7 +57,8 @@ class PayoffSupplierController extends AbstractController
         }
 
         $client = $payment->getFournisseur();
-        $currentDebt = $client->getDetteFounisseur()->first();
+        $currentDebt = $client->getDetteFounisseur()->last();
+
         $remainingDebt = (!$currentDebt || !method_exists($currentDebt, 'getReste')) ? null : $currentDebt->getReste();
         if (is_null($remainingDebt)) {
             $this->addFlash('danger','Aucune dette n\'a été trouvée pour ce fournisseur.');

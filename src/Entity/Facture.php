@@ -28,7 +28,7 @@ class Facture
     #[ORM\ManyToMany(targetEntity: Produit::class, inversedBy: 'factures')]
     private Collection $produit;
 
-    #[ORM\Column(type: ("float"))]
+    #[ORM\Column(type: ("float"), nullable: true)]
     private ?float $quantite = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0',nullable: true)]
@@ -49,10 +49,10 @@ class Facture
     #[ORM\ManyToOne(inversedBy: 'factures')]
     private ?Client $client = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $nomProduit = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255,nullable: true)]
     private ?string $connect = null;
 
     #[ORM\Column(nullable: true)]

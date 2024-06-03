@@ -36,7 +36,7 @@
                                 <th>{{ c.telephone }}</th>
                                 <th>{{ c.total }}</th>
                                 <th>{{ c.date | date('d/m/Y') }}</th>
-                                <th style="color: {% if c.statut == 'payée' %} green {% elseif c.statut == 'impayé' %} red {% elseif c.statut == 'En cours' %} orange {% elseif c.statut == 'avance' %} rgba(226,103,9,0.88) {% endif %}">
+                                <th style="color: {% if c.statut == 'payée' %} green {% elseif c.statut == 'impayé' %} red {% elseif c.statut == 'En cours' %} orange {% elseif c.statut == 'avance' %} rgba(226,103,9,0.88) {% elseif c.statut == 'ajoutée' %} rgba(78, 115, 223, 1) {% endif %}">
                                     {{ c.statut }}
                                 </th>
 
@@ -73,6 +73,16 @@
                                                     Utilisateur
                                                 </a>
                                                 <br>
+
+                                                <a class="popup-link large-text" title="Ajouter dette" href="{{ path('remboursement', {'id':c.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir ajouter cette dette à la facture ?');">
+                                                    Ajout de dette
+                                                </a>
+                                                <br>
+                                                <a class="popup-link large-text" title="Modifier la facture" href="{{ path('retour', {'id':c.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir modifier la facture ?');">
+                                                    Modifier
+                                                </a>
+                                                <br>
+
                                                 {% if is_granted('ROLE_GESTION_STOCK') %}
                                                     <a class="popup-link large-text" style="color: red;" title="supprimer" href="{{ path('chargement_delete', {'id':c.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette facture ?');">
                                                         Supprimer
@@ -168,7 +178,7 @@
             if (flashMessage !== null) {
                 flashMessage.remove();
             }
-        }, 5000);
+        }, 10000);
     </script>
 
     <script>

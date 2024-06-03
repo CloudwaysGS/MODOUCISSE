@@ -25,7 +25,7 @@ class Chargement
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date = null;
 
-    #[ORM\OneToMany(mappedBy: 'chargement', targetEntity: Facture::class)]
+    #[ORM\OneToMany(mappedBy: 'chargement', targetEntity: Facture::class, cascade: ["persist"])]
     private Collection $facture;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0')]

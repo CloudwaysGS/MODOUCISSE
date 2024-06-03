@@ -31,9 +31,8 @@ class FactureService
         if (!empty($factures)) {
             $lastFacture = end($factures);
             $user = $this->security->getUser();
-
             if ("{$user->getPrenom()} {$user->getNom()}" !== $lastFacture->getConnect()) {
-                throw new \Exception('La facture est verrouillée pour le moment, veuillez accéder à +Facture.');
+                //throw new \Exception('La facture est verrouillée pour le moment, veuillez accéder à Facture2.');
             }
         }
 
