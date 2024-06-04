@@ -51,11 +51,15 @@ class EntreeRepository extends ServiceEntityRepository
 
     public function findTotalEntrées(): float
     {
-        return $this->createQueryBuilder('e')
+        $result = $this->createQueryBuilder('e')
             ->select('SUM(e.total) as total')
             ->getQuery()
             ->getSingleScalarResult();
+
+        // Si le résultat est null, retourner 0.0
+        return $result !== null ? (float) $result : 0.0;
     }
+
 
 
 //    /**

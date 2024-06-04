@@ -133,6 +133,7 @@ class FactureController extends AbstractController
 
         // Récupérer la liste des produits pour afficher dans le formulaire
         $produits = $entityManager->getRepository(Produit::class)->findAll();
+        
         return $this->render('facture/editer.html.twig', [
             'facture' => $facture,
             'produits' => $produits,

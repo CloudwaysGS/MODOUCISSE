@@ -213,8 +213,17 @@ class ChargementController extends AbstractController
         $pdf->Cell(120, 5, 'TELEPHONE : '. ($client ? $client->getTelephone() : ''), 0, 1, 'R');
 
         $pdf->Cell(70, 5, 'NINEA : 0848942 - RC : 10028', 0, 0, 'L');
-        $pdf->Cell(120, 5, 'DATE : '. ($facture->getDate()->format('Y-m-d H:i')), 0, 1, 'R'); // Adjust the date format as needed
 
+        $date = $facture->getDate();
+
+        if ($date !== null) {
+            $formattedDate = $date->format('Y-m-d H:i');
+        } else {
+            $formattedDate = 'Date non définie'; // ou une autre valeur par défaut appropriée
+        }
+
+        $pdf->Cell(120, 5, 'DATE : ' . $formattedDate, 0, 1, 'R');
+        
         $pdf->Ln(2);
 
 
