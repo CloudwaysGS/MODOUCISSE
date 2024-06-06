@@ -17,24 +17,24 @@
                 <div class="table">
                     <table class="table table-bordered text-center">
                         <tr>
-                            <th>N.Facture</th>
                             <th>Nbre</th>
                             <th>Client</th>
                             <th>Adresse</th>
                             <th>Téléphone</th>
                             <th>Total</th>
+                            <th>Avance</th>
                             <th>Date</th>
                             <th>Statut</th>
                             <th>Action</th>
                         </tr>
                         {% for c in pagination %}
                             <tr>
-                                <th>{{ c.numeroFacture }}</th>
                                 <th>{{ c.nombre }}</th>
                                 <th>{{ c.nomClient }}</th>
                                 <th>{{ c.adresse }}</th>
                                 <th>{{ c.telephone }}</th>
                                 <th>{{ c.total }}</th>
+                                <th>{{ c.avance }}</th>
                                 <th>{{ c.date | date('d/m/Y') }}</th>
                                 <th style="color: {% if c.statut == 'payée' %} green {% elseif c.statut == 'impayé' %} red {% elseif c.statut == 'En cours' %} orange {% elseif c.statut == 'avance' %} rgba(226,103,9,0.88) {% elseif c.statut == 'ajoutée' %} rgba(78, 115, 223, 1) {% endif %}">
                                     {{ c.statut }}
