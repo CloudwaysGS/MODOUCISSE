@@ -47,7 +47,7 @@ class Facture2
     private ?string $etat = "1";
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $nomClient = null;
+    private $nomClient = null;
 
     #[ORM\Column(length: 255)]
     private ?string $nomProduit = null;
@@ -191,16 +191,20 @@ class Facture2
         return $this;
     }
 
-    public function getNomClient(): ?string
+    /**
+     * @return mixed
+     */
+    public function getNomClient()
     {
         return $this->nomClient;
     }
 
-    public function setNomClient(string $nomClient): self
+    /**
+     * @param mixed $nomClient
+     */
+    public function setNomClient($nomClient): void
     {
         $this->nomClient = $nomClient;
-
-        return $this;
     }
 
     public function getEtat(): ?string

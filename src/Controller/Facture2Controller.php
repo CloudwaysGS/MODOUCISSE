@@ -187,19 +187,36 @@ class Facture2Controller extends AbstractController
     public function delete(Facture2 $facture,EntityManagerInterface $entityManager, Facture2Repository $repository)
     {
         $produit = $facture->getProduit()->first();
-        if ($produit){
+
+        if ($produit !== false) {
+
             $p = $entityManager->getRepository(Produit::class)->find($produit);
+            $repository->remove($facture); // Mise à jour de l'état de la facture
 
-                $repository->remove($facture); // Mise à jour de l'état de la facture
-
-                //Mise à jour quantité stock produit et total produit
-                $quantite = $facture->getQuantite();
-                $p->setQtStock($p->getQtStock() + $quantite);
-                $updProd = $p->getQtStock() * $p->getPrixUnit();
-                $p->setTotal($updProd);
-                $this->addFlash('success', $produit->getLibelle().' a ete supprimée avec succès.');
-
+            //Mise à jour quantité stock produit et total produit
+            $quantite = $facture->getQuantite();
+            $p->setQtStock($p->getQtStock() + $quantite);
+            $updProd = $p->getQtStock() * $p->getPrixUnit();
+            $p->setTotal($updProd);
+            $this->addFlash('success', $produit->getLibelle() . ' a ete supprimée avec succès.');
             $entityManager->flush();
+
+
+            return $this->redirectToRoute('facture2_liste');
+        } else {
+            $produit = $facture->getProduit()->getOwner()->getNomProduit();
+            $p = $entityManager->getRepository(Produit::class)->findBy(['libelle' => $produit]);
+
+            $repository->remove($facture); // Mise à jour de l'état de la facture
+
+            //Mise à jour quantité stock produit et total produit
+            $quantite = $facture->getQuantite();
+            $p[0]->setQtStock($p[0]->getQtStock() + $quantite);
+            $updProd = $p[0]->getQtStock() * $p[0]->getPrixUnit();
+            $p[0]->setTotal($updProd);
+            $this->addFlash('success', 'Produit supprimé avec succès.');
+            $entityManager->flush();
+
 
             return $this->redirectToRoute('facture2_liste');
         }
@@ -210,72 +227,88 @@ class Facture2Controller extends AbstractController
     #[Route('/facture/delete_all', name: 'facture2_delete_all')]
     public function deleteAll(EntityManagerInterface $entityManager)
     {
-        if (!$this->enregistrerClicked) {
-            $repository = $entityManager->getRepository(Facture2::class);
-            $factures = $repository->findBy(['etat' => 1], ['date' => 'DESC']);
+        $repository = $entityManager->getRepository(Facture2::class);
+        $factures = $repository->findBy(['etat' => 1], ['date' => 'DESC']);
 
-            $client = null;
-            $adresse = null;
-            $telephone = null;
-            if (!empty($factures)) {
-                $firstFacture= end($factures);
-                if ($firstFacture->getClient() !== null) {
-                    $nom = $firstFacture->getClient()->getNom();
-                    $adresse = $firstFacture->getClient()->getAdresse();
-                    $telephone = $firstFacture->getClient()->getTelephone();
+        $client = null;
+        $adresse = null;
+        $telephone = null;
+        $nom = null;
+        $impayé = null;
+
+        if (!empty($factures)) {
+            $firstFacture = end($factures);
+            $endFacture = reset($factures);
+            if ($firstFacture->getClient() !== null) {
+                $nom = $firstFacture->getNomClient();
+                $adresse = $firstFacture->getClient()->getAdresse();
+                $telephone = $firstFacture->getClient()->getTelephone();
+            } elseif ($endFacture->getClient() !== null) {
+                $nom = $endFacture->getNomClient();
+                $adresse = $endFacture->getClient()->getAdresse();
+                $telephone = $endFacture->getClient()->getTelephone();
+            } else {
+                $lastFacture = end($factures); // Récupère la dernière facture dans le tableau
+                
+                if ($lastFacture instanceof Facture2) { // Vérifie que c'est bien une instance de Facture
+                    $nom = $lastFacture->getChargement()->getNomClient();
+                    $adresse = $lastFacture->getChargement()->getAdresse();
+                    $telephone = $lastFacture->getChargement()->getTelephone();
                 }
             }
-            // Save invoices to the Chargement table
-            $chargement = new Chargement();
-            $chargement->setNomClient($nom);
-            $chargement->setAdresse($adresse);
-            $chargement->setTelephone($telephone);
-            $chargement->setNombre(count($factures));
-            if ($chargement->getNombre() == 0) {
-                return $this->redirectToRoute('facture2_liste');
-            }
-            $date = new \DateTime();
-            $chargement->setDate($date);
-            $total = 0;
-
-            foreach ($factures as $facture) {
-                $total = $facture->getTotal();
-                $facture->setEtat(0);
-                $facture->setChargement($chargement);
-                $chargement->addFacture2($facture);
-                $entityManager->persist($facture);
-            }
-            $chargement->setConnect($facture->getConnect());
-            $chargement->setNumeroFacture('FACTURE2-' . $facture->getId() );
-            $chargement->setStatut('En cours');
-            $chargement->setTotal($total);
-            $entityManager->persist($chargement);
-            $entityManager->flush();
-
-            $dette = new Dette();
-            $date = new \DateTime();
-            $dette->setMontantDette($chargement->getTotal());
-            $dette->setReste($chargement->getTotal());
-            $dette->setDateCreated($date);
-            $dette->setStatut('impayé');
-            $nomClient = $chargement->getNomClient();
-            $client = $entityManager->getRepository(Client::class)->findOneBy(['nom' => $nomClient]);
-            $dette->setClient($client);
-            $dette->setCommentaire('Dette de la facture');
-            $dettes = $entityManager->getRepository(Dette::class)->findAll();
-            foreach ( $dettes as $s) {
-                if ( $dette->getClient()->getNom() === $s->getClient()->getNom() && $s->getStatut() == "impayé" && $s->getReste() != 0) {
-                    $chargement->setStatut('impayé');
-                    $entityManager->flush();
-                    $this->addFlash('danger',$s->getClient()->getNom().' a déjà une dette non payée.');
-                    return $this->redirectToRoute('liste_chargement');
-                }
-            }
-
-            $entityManager->persist($dette);
-            $entityManager->flush();
-            return $this->redirectToRoute('facture2_liste');
+        } else {
+            $this->addFlash('danger', 'Aucune facture trouvée.');
+            return;
         }
+
+        if ($nom) {
+            $dettesImpayees = $entityManager->getRepository(Dette::class)->findBy([
+                'statut' => 'impayé',
+                'client' => $entityManager->getRepository(Client::class)->findOneBy(['nom' => $nom])
+            ]);
+            if (!empty($dettesImpayees)) {
+                $impayé = $dettesImpayees[0]->getReste();
+            }
+        }
+
+        // Save invoices to the Chargement table
+        $chargement = new Chargement();
+        $chargement->setNomClient($nom);
+        $chargement->setAdresse($adresse);
+        $chargement->setTelephone($telephone);
+        $chargement->setNombre(count($factures));
+        $chargement->setDetteImpaye($impayé);
+        if ($chargement->getNombre() == 0) {
+            return $this->redirectToRoute('facture_liste');
+        }
+        $date = new \DateTime();
+        $chargement->setDate($date);
+        $total = 0;
+        foreach ($factures as $facture) {
+            $total = $facture->getTotal();
+
+            $facture->setEtat(0);
+            $facture->setChargement($chargement);
+            $chargement->addFacture2($facture);
+            $entityManager->persist($facture);
+        }
+
+        $chargement->setConnect($facture->getConnect());
+        $chargement->setNumeroFacture('FACTURE-' . $facture->getId());
+        $chargement->setStatut('En cours');
+
+        if ($total == null) {
+            foreach ($factures as $montantTotal) {
+                $total += $montantTotal->getMontant();
+            }
+        }
+
+        $chargement->setTotal($total);
+
+        $entityManager->persist($chargement);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('liste_chargement');
     }
 
 

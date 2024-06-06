@@ -35,7 +35,6 @@ class FactureController extends AbstractController
 
         // Récupération de toutes les factures
         $factures = $fac->findAllOrderedByDate();
-
         $produits = $prod->findAllOrderedByDate();
         $clients = $clientRepository->findAllOrderedByDate();
 
@@ -188,26 +187,43 @@ class FactureController extends AbstractController
 
             $repository = $entityManager->getRepository(Facture::class);
             $factures = $repository->findBy(['etat' => 1], ['date' => 'DESC']);
-
             $client = null;
             $adresse = null;
             $telephone = null;
             $nom = null;
             $impayé = null;
 
-            if (!empty($factures)) {
-                $firstFacture= end($factures);
-                if ($firstFacture->getClient() !== null) {
-                    $nom = $firstFacture->getNomClient();
-                    $adresse = $firstFacture->getClient()->getAdresse();
-                    $telephone = $firstFacture->getClient()->getTelephone();
-                }else{
-                    $endFacture= reset($factures);
-                    $nom = $endFacture->getNomClient();
-                    $adresse = $endFacture->getClient()->getAdresse();
-                    $telephone = $endFacture->getClient()->getTelephone();
-                }
+        if (!empty($factures)) {
+    
+            $firstFacture = end($factures);
+            $endFacture = reset($factures);
+            if ($firstFacture->getClient() !== null) {
+                $nom = $firstFacture->getNomClient();
+                $adresse = $firstFacture->getClient()->getAdresse();
+                $telephone = $firstFacture->getClient()->getTelephone();
+            } elseif ($endFacture->getClient() !== null) {
+                $nom = $endFacture->getNomClient();
+                $adresse = $endFacture->getClient()->getAdresse();
+                $telephone = $endFacture->getClient()->getTelephone();
+            } else {
+                $repository = $entityManager->getRepository(Facture::class);
+
+                $queryBuilder = $repository->createQueryBuilder('f')
+                    ->where('f.etat = :etat')
+                    ->andWhere('f.nomClient IS NOT NULL')
+                    ->setParameter('etat', 1)
+                    ->orderBy('f.date', 'DESC');
+
+                $factu = $queryBuilder->getQuery()->getResult();
+                    $nom = $factu[0]->getNomClient();
+                    $adresse = $factu[0]->getClient()->getAdresse();
+                    $telephone = $factu[0]->getClient()->getTelephone();
+                
             }
+        } else {
+            $this->addFlash('danger', 'Aucune facture trouvée.');
+            return;
+        }
 
         if ($nom) {
             $dettesImpayees = $entityManager->getRepository(Dette::class)->findBy([

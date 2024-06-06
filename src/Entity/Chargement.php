@@ -58,6 +58,9 @@ class Chargement
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0', nullable: true)]
     private ?string $detteImpaye = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0', nullable: true)]
+    private ?string $depot = null;
+
     public function __construct()
     {
         $this->facture = new ArrayCollection();
@@ -272,6 +275,18 @@ class Chargement
     public function setDetteImpaye(?string $detteImpaye): self
     {
         $this->detteImpaye = $detteImpaye;
+
+        return $this;
+    }
+
+    public function getDepot(): ?string
+    {
+        return $this->depot;
+    }
+
+    public function setDepot(?string $depot): self
+    {
+        $this->depot = $depot;
 
         return $this;
     }

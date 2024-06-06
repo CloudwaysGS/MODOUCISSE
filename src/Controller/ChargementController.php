@@ -143,8 +143,10 @@ class ChargementController extends AbstractController
 
                 $total += $facture->getMontant();
             }
+
             $reste = $chargement->getReste();
             $avance = $chargement->getAvance();
+            $depot = $chargement->getDepot();
 
         } else {
 
@@ -170,6 +172,10 @@ class ChargementController extends AbstractController
 
                 $total += $facture->getMontant();
             }
+
+            $reste = $chargement->getReste();
+            $avance = $chargement->getAvance();
+            $depot = $chargement->getDepot();
         }
 
         $data[] = [
@@ -256,14 +262,19 @@ class ChargementController extends AbstractController
 
         // Affichage de l'avance si elle n'est pas nulle
         if ($avance !== null) {
-            $pdf->Cell(14.5, 30, 'Acompte', 0, 0, 'L', false);
+            $pdf->Cell(14.5, 30, 'Avance:', 0, 0, 'L', false);
             $pdf->Cell(30.5, 30, utf8_decode($avance . ' '), 0, 1, 'C', false);
         }
 
         // Affichage du reste si il n'est pas nul
         if ($reste !== null) {
-            $pdf->Cell(14.5, -15, 'Reste', 0, 0, 'L', false);
+            $pdf->Cell(14.5, -15, 'Reste:', 0, 0, 'L', false);
             $pdf->Cell(30.5, -15, utf8_decode($reste . ' '), 0, 1, 'C', false);
+        }
+
+        if ($depot !== null) {
+            $pdf->Cell(14.5, -15, 'Depot:', 0, 0, 'L', false);
+            $pdf->Cell(30.5, -15, utf8_decode($depot . ' '), 0, 1, 'C', false);
         }
 
 
@@ -413,6 +424,13 @@ class ChargementController extends AbstractController
             } else {
                 $this->addFlash('danger', 'Client non trouvé.');
             }
+        }elseif($reste < 0){
+
+            $chargement->setDepot(abs($reste));
+            $chargement->setAvance($prixAvance);
+            $chargement->setStatut('payée');
+
+            $this->addFlash('success', 'Le client à un dépot de '.abs($reste));
         }
 
         $entityManager->flush();
@@ -422,14 +440,13 @@ class ChargementController extends AbstractController
     #[Route('/chargement/retour/{id}', name: 'retour')]
     public function retour(Chargement $chargement, EntityManagerInterface $entityManager)
     {
-
         $verifierFacture1 = $entityManager->getRepository(Facture::class)->findBy(['etat' => 1]);
         $verifierFacture2 = $entityManager->getRepository(Facture2::class)->findBy(['etat' => 1]);
-        if (empty($verifierFacture1)){
 
+        if (empty($verifierFacture1)) {
             $nomProduit = $chargement->getFacture()->toArray();
 
-            foreach ($nomProduit as $fac){
+            foreach ($nomProduit as $fac) {
                 $facture = new Facture();
 
                 $nomProd = $fac->getNomProduit();
@@ -447,15 +464,13 @@ class ChargementController extends AbstractController
                 $facture->setConnect($connect);
                 $facture->setClient($client);
                 $facture->setNomClient($nomClient);
+
                 $entityManager->persist($facture);
-
-
             }
-
-        }elseif (empty($verifierFacture2)){
+        } elseif (empty($verifierFacture2)) {
             $nomProduit = $chargement->getFacture()->toArray();
 
-            foreach ($nomProduit as $fac){
+            foreach ($nomProduit as $fac) {
                 $facture = new Facture2();
 
                 $nomProd = $fac->getNomProduit();
@@ -463,25 +478,29 @@ class ChargementController extends AbstractController
                 $montant = $fac->getMontant();
                 $prixUnit = $fac->getPrixUnit();
                 $connect = $fac->getConnect();
+                $client = $fac->getClient();
+                $nomClient = $fac->getNomClient();
 
                 $facture->setNomProduit($nomProd);
                 $facture->setQuantite($qte);
                 $facture->setPrixUnit($prixUnit);
                 $facture->setMontant($montant);
                 $facture->setConnect($connect);
+                $facture->setClient($client);
+                $facture->setNomClient($nomClient);
 
                 $entityManager->persist($facture);
-
-
             }
-        }else{
-            $this->addFlash('danger','Facture1 et Facture2 sont occupées.');
+        } else {
+            $this->addFlash('danger', 'Facture1 et Facture2 sont occupées.');
             return $this->redirectToRoute('liste_chargement');
         }
-
+        // Flush une seule fois après la boucle
         $entityManager->flush();
+
         return $this->redirectToRoute('facture_liste');
     }
+
 
     #[Route('/chargement/retour_produit/{id}', name: 'retour_produit')]
     public function retourProduit(Facture $facture, FactureRepository $repository, EntityManagerInterface $entityManager)
