@@ -72,11 +72,8 @@
                                                 <a class="popup-link large-text" title="Facturier" href="#" data-toggle="modal" data-target="#userModal1" data-user-id="{{ c.id }}">
                                                     Utilisateur
                                                 </a>
-                                                <br>
-
-                                                <a class="popup-link large-text" title="Ajouter dette" href="{{ path('remboursement', {'id':c.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir ajouter cette dette à la facture ?');">
-                                                    Ajout de dette
-                                                </a>
+                                                <br
+                                                
                                                 <br>
                                                 <a class="popup-link large-text" title="Modifier la facture" href="{{ path('retour', {'id':c.id}) }}" onclick="return confirm('Êtes-vous sûr de vouloir modifier la facture ?');">
                                                     Modifier

@@ -256,7 +256,7 @@ class FactureController extends AbstractController
                 $chargement->addFacture($facture);
                 $entityManager->persist($facture);
             }
-
+            
             $chargement->setConnect($facture->getConnect());
             $chargement->setNumeroFacture('FACTURE-' . $facture->getId() );
             $chargement->setStatut('En cours');
@@ -268,7 +268,6 @@ class FactureController extends AbstractController
             }
 
             $chargement->setTotal($total);
-
             $entityManager->persist($chargement);
             $entityManager->flush();
 

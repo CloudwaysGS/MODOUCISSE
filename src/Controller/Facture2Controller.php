@@ -237,6 +237,7 @@ class Facture2Controller extends AbstractController
         $impayé = null;
 
         if (!empty($factures)) {
+
             $firstFacture = end($factures);
             $endFacture = reset($factures);
             if ($firstFacture->getClient() !== null) {
@@ -248,15 +249,21 @@ class Facture2Controller extends AbstractController
                 $adresse = $endFacture->getClient()->getAdresse();
                 $telephone = $endFacture->getClient()->getTelephone();
             } else {
-                $lastFacture = end($factures); // Récupère la dernière facture dans le tableau
-                
-                if ($lastFacture instanceof Facture2) { // Vérifie que c'est bien une instance de Facture
-                    $nom = $lastFacture->getChargement()->getNomClient();
-                    $adresse = $lastFacture->getChargement()->getAdresse();
-                    $telephone = $lastFacture->getChargement()->getTelephone();
-                }
+                $repository = $entityManager->getRepository(Facture2::class);
+
+                $queryBuilder = $repository->createQueryBuilder('f')
+                    ->where('f.etat = :etat')
+                    ->andWhere('f.nomClient IS NOT NULL')
+                    ->setParameter('etat', 1)
+                    ->orderBy('f.date', 'DESC');
+
+                $factu = $queryBuilder->getQuery()->getResult();
+                $nom = $factu[0]->getNomClient();
+                $adresse = $factu[0]->getClient()->getAdresse();
+                $telephone = $factu[0]->getClient()->getTelephone();
             }
         } else {
+
             $this->addFlash('danger', 'Aucune facture trouvée.');
             return;
         }

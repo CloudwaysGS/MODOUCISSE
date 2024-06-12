@@ -120,6 +120,7 @@ class ChargementController extends AbstractController
     #[Route('/chargement/pdf/{id}', name: 'pdf')]
     public function pdf(Chargement $chargement)
     {
+
         $facture = new Facture();
         $factures = $chargement->addFacture($facture);
         foreach ($factures->getFacture() as $facture) {
@@ -195,12 +196,13 @@ class ChargementController extends AbstractController
         // Initialisation du PDF
         $pdf = new \FPDF();
         $pdf->AddPage();
+
         // Titre de la facture
-        $pdf->SetFont('Arial','BI',12);
-        $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
-        $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
-        $pdf->Cell(0, 10, ''.$factures->getNumeroFacture(), 0, 1, 'C', true);
-        $pdf->Ln(1);
+        $pdf->SetFont('Arial', 'BI', 12); // Définir la police : Arial, style gras et italique (Bold Italic), taille 12
+        $pdf->SetTextColor(0, 0, 0); // Définir la couleur du texte : noir (RVB : 0, 0, 0)
+        $pdf->Cell(0, 10, $factures->getNumeroFacture(), 1, 1, 'C'); // Créer une cellule avec le numéro de la facture, avec une bordure
+        $pdf->Ln(1); // Ajouter un saut de ligne (1 unité de hauteur)
+
 
         $prenomNom = $this->getUser() ? $this->getUser()->getPrenom() . ' ' . $this->getUser()->getNom() : 'Anonyme';
         $adresse = $this->getUser() ? $this->getUser()->getAdresse() : 'Anonyme';
@@ -212,13 +214,13 @@ class ChargementController extends AbstractController
         $pdf->Cell(70, 5, 'COMMERCANT : '.$prenomNom, 0, 0, 'L');
         $pdf->Cell(120, 5, 'CLIENT : ' . ($client ? $client->getNom() : ''), 0, 1, 'R');
 
-        $pdf->Cell(70, 5, 'ADRESSE : '.$adresse.' / Kaolack', 0, 0, 'L');
+        $pdf->Cell(70, 5, 'ADRESSE : Garage Nioro Kaolack - Senegal', 0, 0, 'L');
         $pdf->Cell(120, 5, 'ADRESSE : '. ($client ? $client->getAdresse() : ''), 0, 1, 'R');
 
-        $pdf->Cell(70, 5, 'TELEPHONE : '.$phone, 0, 0, 'L');
+        $pdf->Cell(70, 5, 'TELEPHONE : +221 77 570 65 97 - 77 578 00 49', 0, 0, 'L');
         $pdf->Cell(120, 5, 'TELEPHONE : '. ($client ? $client->getTelephone() : ''), 0, 1, 'R');
 
-        $pdf->Cell(70, 5, 'NINEA : 0848942 - RC : 10028', 0, 0, 'L');
+        $pdf->Cell(70, 5, 'NINEA : 0098379332M1 - RC : SN-KLK-2022 A 4546', 0, 0, 'L');
 
         $date = $facture->getDate();
 
@@ -229,18 +231,19 @@ class ChargementController extends AbstractController
         }
 
         $pdf->Cell(120, 5, 'DATE : ' . $formattedDate, 0, 1, 'R');
-        
+
         $pdf->Ln(2);
 
 
         // Affichage des en-têtes du tableau
-        $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
         $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
-        foreach ($headers as $header) {
-            $pdf->SetFont('Arial', 'B', 12);
-            $pdf->Cell(47.5, 10, utf8_decode($header), 0, 0, 'C', true); // true pour la couleur de fond
-        }
+        $pdf->SetFont('Arial', 'B', 12);
+
+// Créer une cellule fusionnée avec bordure et tabulations entre les en-têtes
+        $tabSeparatedHeaders = implode("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t", $headers); // Utilisez le caractère de tabulation "\t" entre les en-têtes
+        $pdf->Cell(190, 10, utf8_decode($tabSeparatedHeaders), 1, 0, 'C', false); // Utilisez la chaîne $tabSeparatedHeaders
         $pdf->Ln();
+
 
         // Affichage des données de la facture
         foreach ($data as $row) {
@@ -255,10 +258,19 @@ class ChargementController extends AbstractController
         $pdf->SetFont('Arial', 'B', 12);
 
         // Affichage du total de la facture
-        $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
         $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
-        $pdf->Cell(142.5, -10, 'Total', 0, 0, 'L', true); // true pour la couleur de fond
-        $pdf->Cell(47.5, -10, utf8_decode($total . ' F'), 0, 1, 'C',true);
+        $pdf->Cell(190, 10, '', 1, 1, 'L', false); // Créer une cellule vide avec bordure
+
+// Positionner "Total" à gauche
+        $pdf->SetX(10);
+        $pdf->SetY($pdf->GetY() - 10); // Remonter à la ligne précédente
+        $pdf->Cell(142.5, 10, 'Total', 0, 0, 'L', false);
+
+// Positionner le montant total à droite
+        $pdf->SetX(140);
+        $pdf->Cell(47.5, 10, utf8_decode($total . ' F'), 0, 1, 'R', false);
+
+
 
         // Affichage de l'avance si elle n'est pas nulle
         if ($avance !== null) {
@@ -467,8 +479,12 @@ class ChargementController extends AbstractController
 
                 $entityManager->persist($facture);
             }
+            $entityManager->flush();
+
+            return $this->redirectToRoute('facture_liste');
+
         } elseif (empty($verifierFacture2)) {
-            $nomProduit = $chargement->getFacture()->toArray();
+            $nomProduit = $chargement->getFacture2s()->toArray();
 
             foreach ($nomProduit as $fac) {
                 $facture = new Facture2();
@@ -490,15 +506,20 @@ class ChargementController extends AbstractController
                 $facture->setNomClient($nomClient);
 
                 $entityManager->persist($facture);
+                
             }
+
+            // Flush une seule fois après la boucle
+            $entityManager->flush();
+
+            return $this->redirectToRoute('facture2_liste');
+
         } else {
             $this->addFlash('danger', 'Facture1 et Facture2 sont occupées.');
             return $this->redirectToRoute('liste_chargement');
         }
-        // Flush une seule fois après la boucle
-        $entityManager->flush();
 
-        return $this->redirectToRoute('facture_liste');
+       
     }
 
 
