@@ -239,11 +239,10 @@ class ChargementController extends AbstractController
         $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
         $pdf->SetFont('Arial', 'B', 12);
 
-// Créer une cellule fusionnée avec bordure et tabulations entre les en-têtes
+        // Créer une cellule fusionnée avec bordure et tabulations entre les en-têtes
         $tabSeparatedHeaders = implode("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t", $headers); // Utilisez le caractère de tabulation "\t" entre les en-têtes
         $pdf->Cell(190, 10, utf8_decode($tabSeparatedHeaders), 1, 0, 'C', false); // Utilisez la chaîne $tabSeparatedHeaders
-        $pdf->Ln();
-
+        $pdf->Ln(); // Sauter de ligne après les en-têtes
 
         // Affichage des données de la facture
         foreach ($data as $row) {
@@ -251,47 +250,43 @@ class ChargementController extends AbstractController
                 $pdf->SetFont('Arial', '', 10.5);
                 $pdf->Cell(47.5, 10, utf8_decode($value), 0, 0, 'C');
             }
-            $pdf->Ln();
+            $pdf->Ln(); // Sauter de ligne après chaque ligne de données
         }
 
-        // Affichage du total de la facture
+        // Positionner "Total" sans espace
+        $pdf->SetY($pdf->GetY() - 10); // Ajuster la position Y pour éliminer l'espace
         $pdf->SetFont('Arial', 'B', 12);
-
-        // Affichage du total de la facture
         $pdf->SetTextColor(0, 0, 0); // Couleur du texte du titre
-        $pdf->Cell(190, 10, '', 1, 1, 'L', false); // Créer une cellule vide avec bordure
+        $pdf->Cell(190, 10, '', 1, 0, 'L', false); // Créer une cellule vide avec bordure sans saut de ligne
 
-// Positionner "Total" à gauche
-        $pdf->SetX(10);
-        $pdf->SetY($pdf->GetY() - 10); // Remonter à la ligne précédente
+        // Positionner "Total" à gauche
+        $pdf->SetX(10); // Se positionner à gauche sans remonter
         $pdf->Cell(142.5, 10, 'Total', 0, 0, 'L', false);
 
-// Positionner le montant total à droite
-        $pdf->SetX(140);
-        $pdf->Cell(47.5, 10, utf8_decode($total . ' F'), 0, 1, 'R', false);
+        // Positionner le montant total à droite
+        $pdf->SetX(152.5); // Ajuster la position X pour aligner correctement après "Total"
+        $pdf->Cell(37.5, 10, utf8_decode($total . ' F'), 0, 1, 'R', false); // Ajuster la largeur de la cellule
 
-
-
-        // Affichage de l'avance si elle n'est pas nulle
+        // Affichage de l'avance, reste et dépôt sans espace
         if ($avance !== null) {
-            $pdf->Cell(14.5, 30, 'Avance:', 0, 0, 'L', false);
-            $pdf->Cell(30.5, 30, utf8_decode($avance . ' '), 0, 1, 'C', false);
+            $pdf->SetY($pdf->GetY()); // Ajuster la position Y pour éliminer l'espace
+            $pdf->Cell(14.5, 10, 'Avance:', 0, 0, 'L', false);
+            $pdf->Cell(30.5, 10, utf8_decode($avance . ' '), 0, 1, 'C', false);
         }
 
-        // Affichage du reste si il n'est pas nul
         if ($reste !== null) {
-            $pdf->Cell(14.5, -15, 'Reste:', 0, 0, 'L', false);
-            $pdf->Cell(30.5, -15, utf8_decode($reste . ' '), 0, 1, 'C', false);
+            $pdf->SetY($pdf->GetY() - 5); // Ajuster la position Y pour éliminer l'espace
+            $pdf->Cell(14.5, 10, 'Reste:', 0, 0, 'L', false);
+            $pdf->Cell(30.5, 10, utf8_decode($reste . ' '), 0, 1, 'C', false);
         }
 
         if ($depot !== null) {
-            $pdf->Cell(14.5, -15, 'Depot:', 0, 0, 'L', false);
-            $pdf->Cell(30.5, -15, utf8_decode($depot . ' '), 0, 1, 'C', false);
+            $pdf->SetY($pdf->GetY() - 5); // Ajuster la position Y pour éliminer l'espace
+            $pdf->Cell(14.5, 10, 'Depot:', 0, 0, 'L', false);
+            $pdf->Cell(30.5, 10, utf8_decode($depot . ' '), 0, 1, 'C', false);
         }
 
-
-        // Forcer le téléchargement du fichier PDF
-        $pdf->Output('D', $filename);
+        $pdf->Output('I', $filename); // Affiche le PDF dans le navigateur
 
         exit;
 
