@@ -214,7 +214,7 @@ class ChargementController extends AbstractController
         $pdf->Cell(70, 5, 'COMMERCANT : ETABLISSEMENT ALY CISSE', 0, 0, 'L');
         $pdf->Cell(120, 5, 'CLIENT : ' . ($client ? $client->getNom() : ''), 0, 1, 'R');
 
-        $pdf->Cell(70, 5, 'ADRESSE : Garage Nioro Kaolack - Senegal', 0, 0, 'L');
+        $pdf->Cell(70, 5, 'ADRESSE : GARAGE NIORO KAOLACK - SENEGAL', 0, 0, 'L');
         $pdf->Cell(120, 5, 'ADRESSE : '. ($client ? $client->getAdresse() : ''), 0, 1, 'R');
 
         $pdf->Cell(70, 5, 'TELEPHONE : +221 77 570 65 97 - 77 578 00 49', 0, 0, 'L');
