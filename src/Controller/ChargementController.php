@@ -211,7 +211,7 @@ class ChargementController extends AbstractController
         $pdf->SetFont('Arial', 'I', 9);
         $pdf->SetTextColor(51, 51, 51); // Couleur du texte des informations
         $pdf->SetFillColor(204, 204, 204); // Couleur de fond du titre
-        $pdf->Cell(70, 5, 'COMMERCANT : '.$prenomNom, 0, 0, 'L');
+        $pdf->Cell(70, 5, 'COMMERCANT : ETABLISSEMENT ALY CISSE', 0, 0, 'L');
         $pdf->Cell(120, 5, 'CLIENT : ' . ($client ? $client->getNom() : ''), 0, 1, 'R');
 
         $pdf->Cell(70, 5, 'ADRESSE : Garage Nioro Kaolack - Senegal', 0, 0, 'L');
